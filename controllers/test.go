@@ -9,7 +9,7 @@ import (
 )
 
 func GetUsers(c *gin.Context) {
-	users,err := services.GetAllUsers()
+	users, err := services.GetAllUsers()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -19,12 +19,12 @@ func GetUsers(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	var newUser models.User
+	var newUser models.UserTest
 
 	if err := c.BindJSON(&newUser); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	createdUser, err := services.CreateUser(newUser)
 	if err != nil {

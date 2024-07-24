@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/AnkitNayan83/SMA-backend/routes"
-	"github.com/gin-gonic/gin"
+	"github.com/AnkitNayan83/SMA-backend/initializers"
 )
 
+func init() {
+	initializers.LoadEnv()
+	initializers.ConnectToDB()
+	initializers.InitializeApiRoutes()
+}
+
 func main() {
-	router := gin.Default()
-
-	routes.InitializeTestRoutes(router)
-
-	router.Run(":8080")
 }
