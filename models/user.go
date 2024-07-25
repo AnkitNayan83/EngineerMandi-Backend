@@ -26,7 +26,7 @@ type User struct {
 	City           string
 	State          string
 	Country        string
-	Role           Role `gorm:"type:enum('admin', 'client', 'engineer')"`
+	Role           Role `gorm:"type:VARCHAR(20);not null"`
 	Ratings        []Rating
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
@@ -34,7 +34,7 @@ type User struct {
 
 type Rating struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	UserID    string    `gorm:"index"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null;index"`
 	Stars     int       `gorm:"not null"`
 	Comment   string
 	CreatedAt time.Time

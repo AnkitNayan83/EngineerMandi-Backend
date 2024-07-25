@@ -7,7 +7,7 @@ import (
 )
 
 type EngineerModel struct {
-	UserId          uuid.UUID        `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	UserId          uuid.UUID        `gorm:"type:uuid;primaryKey"`
 	User            User             `gorm:"foreignKey:UserId"`
 	Specializations []Specialization `gorm:"many2many:engineer_specializations"`
 	Experience      float64
@@ -26,9 +26,9 @@ const (
 )
 
 type EngineerSkills struct {
-	EngineerID        uuid.UUID            `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	SkillID           uuid.UUID            `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	ProficiencyLevel  ProficiencyLevelEnum `gorm:"type:enum('beginner', 'intermediate', 'advanced')"`
+	EngineerID        uuid.UUID            `gorm:"type:uuid;primaryKey"`
+	SkillID           uuid.UUID            `gorm:"type:uuid;primaryKey"`
+	ProficiencyLevel  ProficiencyLevelEnum `gorm:"type:VARCHAR(20)"`
 	YearsOfExperience float64              `gorm:"default:0.0"`
 }
 
