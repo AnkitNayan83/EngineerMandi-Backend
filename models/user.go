@@ -40,3 +40,9 @@ type Rating struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type OAuthUser struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
