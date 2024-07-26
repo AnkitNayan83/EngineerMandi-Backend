@@ -6,7 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitializeTestRoutes(router *gin.Engine) {
-	router.GET("/users", middlewares.TestMiddleware(),controllers.GetUsers)
+func InitializeTestRoutes(router *gin.RouterGroup) {
+
+	router.GET("/users", middlewares.TestMiddleware(), controllers.GetUsers)
 	router.POST("/users", controllers.CreateUser)
 }

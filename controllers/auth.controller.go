@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/AnkitNayan83/SMA-backend/services"
+	"github.com/AnkitNayan83/SMA-backend/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,6 +26,7 @@ func (ctrl *AuthController) GoogleLogin(c *gin.Context) {
 
 func (ctrl *AuthController) GoogleCallback(c *gin.Context) {
 	code := c.Query("code")
+
 	token, err := ctrl.userService.ExchangeCodeForToken(code)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -45,5 +47,12 @@ func (ctrl *AuthController) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, newUser)
+	jwtToken, err := utils.GenerateJwt(newUser.ID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": jwtToken})
 }

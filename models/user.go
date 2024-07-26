@@ -26,7 +26,7 @@ type User struct {
 	City           string
 	State          string
 	Country        string
-	Role           Role `gorm:"type:VARCHAR(20);not null"`
+	Role           Role `gorm:"type:VARCHAR(20);default:client"`
 	Ratings        []Rating
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

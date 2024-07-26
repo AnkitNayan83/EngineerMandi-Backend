@@ -25,7 +25,6 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (r *userRepository) CreateUser(user *models.OAuthUser) (*models.User, error) {
 	names := strings.Split(user.Name, " ")
-
 	if len(names) == 0 {
 		return nil, errors.New("invalid user name")
 	}
