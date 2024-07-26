@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/AnkitNayan83/SMA-backend/initializers"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/initializers"
 )
 
 func init() {

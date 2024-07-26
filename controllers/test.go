@@ -3,8 +3,8 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/AnkitNayan83/SMA-backend/models"
-	"github.com/AnkitNayan83/SMA-backend/services"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/services"
 	"github.com/gin-gonic/gin"
 )
 

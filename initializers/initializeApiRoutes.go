@@ -3,11 +3,11 @@ package initializers
 import (
 	"os"
 
-	"github.com/AnkitNayan83/SMA-backend/controllers"
-	"github.com/AnkitNayan83/SMA-backend/middlewares"
-	"github.com/AnkitNayan83/SMA-backend/repositories"
-	"github.com/AnkitNayan83/SMA-backend/routes"
-	"github.com/AnkitNayan83/SMA-backend/services"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/controllers"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/middlewares"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/repositories"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/routes"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/services"
 	"github.com/gin-gonic/gin"
 )
 

@@ -23,5 +23,5 @@ func ConnectToDB() {
 	if err != nil {
 		log.Fatal("failed to connect to the database")
 	}
-	log.Print(DB)
+	log.Print("Connected to postgres database ✅")
 }

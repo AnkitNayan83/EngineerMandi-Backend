@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/AnkitNayan83/SMA-backend/models"
-	"github.com/AnkitNayan83/SMA-backend/repositories"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/repositories"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"

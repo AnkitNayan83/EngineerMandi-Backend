@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/AnkitNayan83/SMA-backend/models"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"gorm.io/gorm"
 )
 

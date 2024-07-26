@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/AnkitNayan83/SMA-backend/initializers"
-	"github.com/AnkitNayan83/SMA-backend/models"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/initializers"
+	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 )
 
 func init() {
