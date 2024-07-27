@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/AnkitNayan83/EngineerMandi-Backend/services"
@@ -9,10 +10,10 @@ import (
 )
 
 type AuthController struct {
-	userService services.UserService
+	userService services.AuthService
 }
 
-func NewAuthController(userService services.UserService) *AuthController {
+func NewAuthController(userService services.AuthService) *AuthController {
 	return &AuthController{
 		userService: userService,
 	}
@@ -46,6 +47,8 @@ func (ctrl *AuthController) GoogleCallback(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	log.Print(userInfo)
 
 	jwtToken, err := utils.GenerateJwt(newUser.ID)
 

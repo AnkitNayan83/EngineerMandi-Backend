@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -15,19 +16,19 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-type UserService interface {
+type AuthService interface {
 	HandleUserLogin(userInfo *models.OAuthUser) (*models.User, error)
 	GetGoogleLoginUrl() string
 	ExchangeCodeForToken(code string) (*oauth2.Token, error)
 	FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, error)
 }
 
-type userService struct {
+type authService struct {
 	repo repositories.UserRepository
 }
 
-func NewAuthService(repo repositories.UserRepository) UserService {
-	return &userService{repo: repo}
+func NewAuthService(repo repositories.UserRepository) AuthService {
+	return &authService{repo: repo}
 }
 
 var googleOAuth2Config *oauth2.Config
@@ -42,22 +43,21 @@ func InitializeOAuth() {
 	}
 }
 
-func (s *userService) GetGoogleLoginUrl() string {
+func (s *authService) GetGoogleLoginUrl() string {
 	return googleOAuth2Config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 }
 
-func (s *userService) ExchangeCodeForToken(code string) (*oauth2.Token, error) {
+func (s *authService) ExchangeCodeForToken(code string) (*oauth2.Token, error) {
 	return googleOAuth2Config.Exchange(context.Background(), code)
 }
 
-func (s *userService) FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, error) {
+func (s *authService) FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, error) {
 	client := googleOAuth2Config.Client(context.Background(), token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 
 	if err != nil {
 		return nil, err
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -72,6 +72,8 @@ func (s *userService) FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, err
 		return nil, err
 	}
 
+	fmt.Print(string(body))
+
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
@@ -82,7 +84,7 @@ func (s *userService) FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, err
 
 }
 
-func (s *userService) HandleUserLogin(userInfo *models.OAuthUser) (*models.User, error) {
+func (s *authService) HandleUserLogin(userInfo *models.OAuthUser) (*models.User, error) {
 
 	existingUser, err := s.repo.FindUserByEmail(userInfo.Email)
 

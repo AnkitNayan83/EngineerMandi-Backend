@@ -1,9 +1,6 @@
 package repositories
 
 import (
-	"errors"
-	"strings"
-
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"gorm.io/gorm"
 )
@@ -24,23 +21,12 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepository) CreateUser(user *models.OAuthUser) (*models.User, error) {
-	names := strings.Split(user.Name, " ")
-	if len(names) == 0 {
-		return nil, errors.New("invalid user name")
-	}
-
-	var firstName string
-	var lastName string
-
-	firstName = names[0]
-	if len(names) > 1 {
-		lastName = names[1]
-	}
 
 	userData := models.User{
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     user.Email,
+		FirstName:      user.FirstName,
+		LastName:       user.LastName,
+		Email:          user.Email,
+		ProfilePicture: user.Picture,
 	}
 	resp := r.DB.Create(&userData)
 
