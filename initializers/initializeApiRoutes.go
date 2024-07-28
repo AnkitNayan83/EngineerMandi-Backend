@@ -11,14 +11,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var userRepo repositories.UserRepository
+
 func InitializeAuthRoutes(router *gin.RouterGroup) {
 
 	services.InitializeOAuth()
-	userRepo := repositories.NewUserRepository(DB)
+	userRepo = repositories.NewUserRepository(DB)
 	authService := services.NewAuthService(userRepo)
 	authController := controllers.NewAuthController(authService)
 
 	routes.AuthRoutes(router, authController)
+}
+
+func InitializeUserRoutes(router *gin.RouterGroup) {
+	userService := services.NewUserService(userRepo)
+	userController := controllers.NewUserController(userService)
+
+	routes.UserRoutes(router, userController)
 }
 
 func InitializeTestRoutes(router *gin.RouterGroup) {
@@ -34,13 +43,17 @@ func InitializeApiRoutes() {
 
 	router := gin.Default()
 
-	v1AuthRouter := router.Group("/api/v1")
+	v1PublicRouter := router.Group("/api/v1")
 
 	v1ProtectedRouter := router.Group("/api/v1")
 	v1ProtectedRouter.Use(middlewares.AuthMiddleware())
 
-	InitializeTestRoutes(v1ProtectedRouter)
-	InitializeAuthRoutes(v1AuthRouter)
+	// Public Routes
+	InitializeAuthRoutes(v1PublicRouter)
+	InitializeTestRoutes(v1PublicRouter)
+
+	// Protected Routes
+	InitializeUserRoutes(v1ProtectedRouter)
 
 	router.Run(":" + port)
 }

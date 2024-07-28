@@ -10,17 +10,17 @@ import (
 )
 
 type AuthController struct {
-	userService services.AuthService
+	authService services.AuthService
 }
 
-func NewAuthController(userService services.AuthService) *AuthController {
+func NewAuthController(authService services.AuthService) *AuthController {
 	return &AuthController{
-		userService: userService,
+		authService: authService,
 	}
 }
 
 func (ctrl *AuthController) GoogleLogin(c *gin.Context) {
-	url := ctrl.userService.GetGoogleLoginUrl()
+	url := ctrl.authService.GetGoogleLoginUrl()
 
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
@@ -28,20 +28,20 @@ func (ctrl *AuthController) GoogleLogin(c *gin.Context) {
 func (ctrl *AuthController) GoogleCallback(c *gin.Context) {
 	code := c.Query("code")
 
-	token, err := ctrl.userService.ExchangeCodeForToken(code)
+	token, err := ctrl.authService.ExchangeCodeForToken(code)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userInfo, err := ctrl.userService.FetchUserInfo(token)
+	userInfo, err := ctrl.authService.FetchUserInfo(token)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	newUser, err := ctrl.userService.HandleUserLogin(userInfo)
+	newUser, err := ctrl.authService.HandleUserLogin(userInfo)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

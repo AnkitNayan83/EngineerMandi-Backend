@@ -2,12 +2,9 @@ package routes
 
 import (
 	"github.com/AnkitNayan83/EngineerMandi-Backend/controllers"
-	"github.com/AnkitNayan83/EngineerMandi-Backend/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
 func InitializeTestRoutes(router *gin.RouterGroup) {
-
-	router.GET("/users", middlewares.TestMiddleware(), controllers.GetUsers)
-	router.POST("/users", controllers.CreateUser)
+	router.GET("/ping", controllers.HealthCheckup)
 }
