@@ -7,6 +7,7 @@ import (
 
 type UserService interface {
 	ProfileSetup(userId string, user *models.User) (*models.User, error)
+	GetUserInfo(userId string) (*models.User, error)
 }
 
 type userService struct {
@@ -59,4 +60,8 @@ func (s *userService) ProfileSetup(userId string, updatedUser *models.User) (*mo
 
 	return currentUser, nil
 
+}
+
+func (s *userService) GetUserInfo(userId string) (*models.User, error) {
+	return s.userRepository.FindUserById(userId)
 }

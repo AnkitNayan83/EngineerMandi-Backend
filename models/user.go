@@ -15,30 +15,30 @@ const (
 )
 
 type User struct {
-	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	FirstName      string    `gorm:"not null"`
-	LastName       string
-	Email          string `gorm:"unique;not null"`
-	Bio            string
-	ProfilePicture string
-	Address        string
-	PinCode        string
-	City           string
-	State          string
-	Country        string
-	Role           Role `gorm:"type:VARCHAR(20);default:client"`
-	Ratings        []Rating
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	FirstName      string    `gorm:"not null" json:"firstName"`
+	LastName       string    `json:"lastName"`
+	Email          string    `gorm:"unique;not null" json:"email"`
+	Bio            string    `json:"bio"`
+	ProfilePicture string    `json:"profilePicture"`
+	Address        string    `json:"address"`
+	PinCode        string    `json:"pinCode"`
+	City           string    `json:"city"`
+	State          string    `json:"state"`
+	Country        string    `json:"country"`
+	Role           Role      `gorm:"type:VARCHAR(20);default:client" json:"role"`
+	Ratings        []Rating  `json:"ratings,omitempty"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
 type Rating struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	UserID    uuid.UUID `gorm:"type:uuid;not null;index"`
-	Stars     int       `gorm:"not null"`
-	Comment   string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null;index" json:"userId"`
+	Stars     int       `gorm:"not null" json:"stars"`
+	Comment   string    `json:"comment"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type OAuthUser struct {

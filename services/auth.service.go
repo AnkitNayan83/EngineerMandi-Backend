@@ -17,7 +17,7 @@ import (
 )
 
 type AuthService interface {
-	HandleUserLogin(userInfo *models.OAuthUser) (*models.User, error)
+	HandleUserLogin(userInfo *models.OAuthUser) (*models.User, bool, error)
 	GetGoogleLoginUrl() string
 	ExchangeCodeForToken(code string) (*oauth2.Token, error)
 	FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, error)
@@ -84,19 +84,19 @@ func (s *authService) FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, err
 
 }
 
-func (s *authService) HandleUserLogin(userInfo *models.OAuthUser) (*models.User, error) {
+func (s *authService) HandleUserLogin(userInfo *models.OAuthUser) (*models.User, bool, error) {
 
 	existingUser, err := s.repo.FindUserByEmail(userInfo.Email)
 
 	if err == nil {
-		return existingUser, nil
+		return existingUser, false, nil
 	}
 
 	user, err := s.repo.CreateUser(userInfo)
 
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return user, nil
+	return user, true, nil
 }

@@ -56,3 +56,24 @@ func (ctrl *UserController) ProfileSetup(c *gin.Context) {
 	c.JSON(http.StatusOK, userData)
 
 }
+
+func (ctrl *UserController) GetUserInfo(c *gin.Context) {
+
+	user, exists := c.Get("userID")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found in the token"})
+		return
+	}
+
+	userId := user.(string)
+
+	userInfo, err := ctrl.userService.GetUserInfo(userId)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	}
+
+	c.JSON(http.StatusOK, userInfo)
+
+}
