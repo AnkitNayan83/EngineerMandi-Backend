@@ -89,7 +89,14 @@ func (s *authService) HandleUserLogin(userInfo *models.OAuthUser) (*models.User,
 	existingUser, err := s.repo.FindUserByEmail(userInfo.Email)
 
 	if err == nil {
-		return existingUser, false, nil
+
+		isProfileConpleted := existingUser.Address != "" &&
+			existingUser.City != "" &&
+			existingUser.State != "" &&
+			existingUser.Country != "" &&
+			existingUser.PinCode != ""
+
+		return existingUser, isProfileConpleted, nil
 	}
 
 	user, err := s.repo.CreateUser(userInfo)
