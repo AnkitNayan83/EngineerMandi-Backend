@@ -9,6 +9,7 @@ import (
 type EngineerModel struct {
 	UserId          uuid.UUID        `gorm:"type:uuid;primaryKey" json:"userId"`
 	User            User             `gorm:"foreignKey:UserId" json:"user"`
+	Resume          string           `gorm:"not null" json:"resume"`
 	Specializations []Specialization `gorm:"many2many:engineer_specializations" json:"specializations"`
 	Experience      float64          `json:"experience"`
 	Skills          []Skill          `gorm:"many2many:engineer_skills" json:"skills"`
