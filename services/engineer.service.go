@@ -20,7 +20,6 @@ func NewEngineerService(repo repositories.EngineerRepository) EngineerService {
 }
 
 func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error) {
-	var engineer models.EngineerModel
 	var specializations []models.Specialization
 	var skills []models.EngineerSkills
 	var educations []models.Education
@@ -123,6 +122,12 @@ func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, user
 	}
 
 	engineer, err := s.repo.CreateEngineer(&newEngineerData, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return engineer, nil
 
 }
 
