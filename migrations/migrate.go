@@ -28,6 +28,7 @@ func Migrate() {
 		&models.Certification{},
 		&models.Project{},
 		&models.ProjectUrl{},
+		&models.EngineerExperience{},
 	)
 
 	if err != nil {

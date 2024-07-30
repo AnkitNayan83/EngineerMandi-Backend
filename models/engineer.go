@@ -7,15 +7,15 @@ import (
 )
 
 type EngineerModel struct {
-	UserId          uuid.UUID        `gorm:"type:uuid;primaryKey" json:"userId"`
-	User            User             `gorm:"foreignKey:UserId" json:"user"`
-	Resume          string           `gorm:"not null" json:"resume"`
-	Specializations []Specialization `gorm:"many2many:engineer_specializations" json:"specializations"`
-	Experience      float64          `json:"experience"`
-	Skills          []Skill          `gorm:"many2many:engineer_skills" json:"skills"`
-	Education       []Education      `gorm:"foreignKey:EngineerID;references:UserId" json:"education"`
-	Certifications  []Certification  `gorm:"foreignKey:EngineerID;references:UserId" json:"certifications"`
-	Projects        []Project        `gorm:"foreignKey:EngineerID;references:UserId" json:"projects"`
+	UserId          uuid.UUID            `gorm:"type:uuid;primaryKey" json:"userId"`
+	User            User                 `gorm:"foreignKey:UserId" json:"user"`
+	Resume          string               `gorm:"not null" json:"resume"`
+	Specializations []Specialization     `gorm:"many2many:engineer_specializations" json:"specializations"`
+	Experiences     []EngineerExperience `gorm:"foreignKey:EngineerID;references:UserId" json:"experiences"`
+	Skills          []EngineerSkills     `gorm:"foreignKey:EngineerID;references:UserId" json:"skills"`
+	Education       []Education          `gorm:"foreignKey:EngineerID;references:UserId" json:"education"`
+	Certifications  []Certification      `gorm:"foreignKey:EngineerID;references:UserId" json:"certifications"`
+	Projects        []Project            `gorm:"foreignKey:EngineerID;references:UserId" json:"projects"`
 }
 
 type ProficiencyLevelEnum string
@@ -45,20 +45,23 @@ type Specialization struct {
 }
 
 type Education struct {
-	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	EngineerID uuid.UUID `gorm:"type:uuid;not null" json:"engineerId"`
-	Degree     string    `gorm:"not null" json:"degree"`
-	Institute  string    `gorm:"not null" json:"institute"`
-	CGPA       float64   `gorm:"not null" json:"cgpa"`
+	ID            uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	EngineerID    uuid.UUID `gorm:"type:uuid;not null" json:"engineerId"`
+	Degree        string    `gorm:"not null" json:"degree"`
+	Branch        string    `gorm:"not null" json:"branch"`
+	Institute     string    `gorm:"not null" json:"institute"`
+	YearOfPassing int       `gorm:"not null" json:"yearOfPassing"`
+	CGPA          float64   `gorm:"not null" json:"cgpa"`
 }
 
 type Certification struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	Name        string    `gorm:"not null" json:"name"`
-	Authority   string    `gorm:"not null" json:"authority"`
-	Description string    `json:"description,omitempty"`
-	IssuedDate  time.Time `gorm:"not null" json:"issuedDate"`
-	EngineerID  uuid.UUID `gorm:"type:uuid;not null" json:"engineerId"`
+	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	Name           string    `gorm:"not null" json:"name"`
+	Authority      string    `gorm:"not null" json:"authority"`
+	CertificateUrl string    `json:"certificateUrl"`
+	Description    string    `json:"description,omitempty"`
+	IssuedDate     time.Time `gorm:"not null" json:"issuedDate"`
+	EngineerID     uuid.UUID `gorm:"type:uuid;not null" json:"engineerId"`
 }
 
 type Project struct {
@@ -74,4 +77,16 @@ type ProjectUrl struct {
 	ProjectID uuid.UUID `gorm:"type:uuid;not null;index" json:"projectId"`
 	Url       string    `gorm:"not null;uniqueIndex:idx_projectid_url" json:"url"`
 	Type      string    `gorm:"not null;uniqueIndex:idx_projectid_type" json:"type"`
+}
+
+type EngineerExperience struct {
+	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	EngineerID  uuid.UUID `gorm:"type:uuid;not null;index" json:"engineerId"`
+	Company     string    `gorm:"not null" json:"company"`
+	Location    string    `gorm:"not null" json:"location"`
+	Role        string    `gorm:"not null" json:"role"`
+	Description string    `json:"description,omitempty"`
+	StartDate   time.Time `gorm:"not null" json:"startDate"`
+	IsCurrent   bool      `gorm:"not null" json:"isCurrent"`
+	EndDate     time.Time `json:"endDate,omitempty"`
 }
