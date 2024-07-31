@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"log"
+
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -8,6 +10,8 @@ import (
 
 type EngineerRepository interface {
 	CreateEngineer(engineerData *models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error)
+	UpdateEngineer(engineerData *models.EngineerModel) (*models.EngineerModel, error)
+	GetEngineerByID(id uuid.UUID) (*models.EngineerModel, error)
 	CreateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
 	GetEngineerSkillByID(id string) (*models.EngineerSkills, error)
 	CreateProject(projectData *models.Project, engineerId uuid.UUID) (*models.Project, error)
@@ -35,13 +39,7 @@ func NewEngineerRepository(db *gorm.DB) EngineerRepository {
 func (r *engineerRepository) CreateEngineer(engineerData *models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error) {
 
 	engineer := models.EngineerModel{
-		UserId:          userId,
-		Specializations: engineerData.Specializations,
-		Experiences:     engineerData.Experiences,
-		Skills:          engineerData.Skills,
-		Education:       engineerData.Education,
-		Certifications:  engineerData.Certifications,
-		Projects:        engineerData.Projects,
+		UserId: userId,
 	}
 
 	resp := r.DB.Create(&engineer)
@@ -53,8 +51,34 @@ func (r *engineerRepository) CreateEngineer(engineerData *models.EngineerModel, 
 	return &engineer, nil
 }
 
+func (r *engineerRepository) UpdateEngineer(engineerData *models.EngineerModel) (*models.EngineerModel, error) {
+
+	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerData.UserId).Updates(&engineerData).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return engineerData, nil
+}
+
+func (r *engineerRepository) GetEngineerByID(id uuid.UUID) (*models.EngineerModel, error) {
+
+	var engineer models.EngineerModel
+
+	resp := r.DB.Where("user_id = ?", id).First(&engineer)
+
+	if resp.Error != nil {
+		return nil, resp.Error
+	}
+
+	return &engineer, nil
+}
+
 func (r *engineerRepository) CreateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error) {
 
+	log.Println(engineerSkillData.SkillID)
+	log.Println(userId)
 	engineerSkill := models.EngineerSkills{
 		EngineerID:        userId,
 		SkillID:           engineerSkillData.SkillID,
@@ -85,18 +109,50 @@ func (r *engineerRepository) GetEngineerSkillByID(id string) (*models.EngineerSk
 }
 
 func (r *engineerRepository) CreateProject(projectData *models.Project, engineerId uuid.UUID) (*models.Project, error) {
+	// Start a transaction
+	tx := r.DB.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 
 	project := models.Project{
 		Name:        projectData.Name,
 		Description: projectData.Description,
-		ProjectUrls: projectData.ProjectUrls,
 		EngineerID:  engineerId,
 	}
 
-	resp := r.DB.Create(&project)
+	// Create the project
+	if err := tx.Create(&project).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	if resp.Error != nil {
-		return nil, resp.Error
+	if len(projectData.ProjectUrls) > 0 {
+		var projectUrls []models.ProjectUrl
+
+		// Create associated project URLs
+		for _, projectUrlData := range projectData.ProjectUrls {
+			projectUrl := models.ProjectUrl{
+				ProjectID: project.ID,
+				Url:       projectUrlData.Url,
+				Type:      projectUrlData.Type,
+			}
+
+			if err := tx.Create(&projectUrl).Error; err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+
+			projectUrls = append(projectUrls, projectUrl)
+		}
+
+		project.ProjectUrls = projectUrls
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	return &project, nil

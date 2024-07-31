@@ -30,6 +30,14 @@ func InitializeUserRoutes(router *gin.RouterGroup) {
 	routes.UserRoutes(router, userController)
 }
 
+func InitializeEngineerRoutes(router *gin.RouterGroup) {
+	engineerRepo := repositories.NewEngineerRepository(DB)
+	engineerService := services.NewEngineerService(engineerRepo)
+	engineerController := controllers.NewEngineerController(engineerService)
+
+	routes.EngineerRoutes(router, engineerController)
+}
+
 func InitializeTestRoutes(router *gin.RouterGroup) {
 	routes.InitializeTestRoutes(router)
 }
@@ -54,6 +62,7 @@ func InitializeApiRoutes() {
 
 	// Protected Routes
 	InitializeUserRoutes(v1ProtectedRouter)
+	InitializeEngineerRoutes(v1ProtectedRouter)
 
 	router.Run(":" + port)
 }
