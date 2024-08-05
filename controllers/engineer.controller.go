@@ -56,7 +56,6 @@ func (ctrl *EngineerController) CreateEngineer(c *gin.Context) {
 		return
 	}
 
-	// delete user field from engineer object i am not sending to client
 	engineer.User = models.User{}
 
 	c.JSON(http.StatusOK, gin.H{"data": engineer})
