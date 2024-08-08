@@ -7,4 +7,5 @@ import (
 
 func EngineerRoutes(router *gin.RouterGroup, engineerController *controllers.EngineerController) {
 	router.POST("/engineer", engineerController.CreateEngineer)
+	router.PATCH("/engineer", engineerController.UpdateEngineer)
 }

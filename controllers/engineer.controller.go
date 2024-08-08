@@ -60,3 +60,47 @@ func (ctrl *EngineerController) CreateEngineer(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": engineer})
 }
+
+func (ctrl *EngineerController) UpdateEngineer(c *gin.Context) {
+
+	user, exists := c.Get("userID")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found"})
+		return
+	}
+
+	//convert user to uuid
+	userIDStr, ok := user.(string)
+
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	engineerData := models.EngineerModel{}
+	err = c.ShouldBindJSON(&engineerData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty data in the request"})
+		return
+	}
+
+	engineer, err := ctrl.engineerService.UpdateEngineer(engineerData, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	engineer.User = models.User{}
+
+	c.JSON(http.StatusOK, gin.H{"data": engineer})
+}

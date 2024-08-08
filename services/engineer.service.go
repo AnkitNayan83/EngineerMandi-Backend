@@ -16,6 +16,7 @@ type EngineerService interface {
 	CreateProject(projectData models.Project, userId uuid.UUID) (*models.Project, error)
 	CreateSpecialization(specializationData models.Specialization) (*models.Specialization, error)
 	CreateEngineerExperience(experienceData models.EngineerExperience, userId uuid.UUID) (*models.EngineerExperience, error)
+	UpdateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error)
 }
 
 type engineerService struct {
@@ -49,13 +50,7 @@ func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, user
 			if specialization.ID != uuid.Nil {
 				specializations = append(specializations, specialization)
 			} else {
-				newSpecialization, err := s.CreateSpecialization(specialization)
-
-				if err != nil {
-					return nil, err
-				}
-
-				specializations = append(specializations, *newSpecialization)
+				return nil, errors.New("specialization id not found")
 			}
 		}
 
@@ -72,6 +67,8 @@ func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, user
 				}
 
 				skills = append(skills, *engineerSkill)
+			} else {
+				return nil, errors.New("skill id not found")
 			}
 		}
 		newEngineer.Skills = skills
@@ -130,7 +127,7 @@ func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, user
 		newEngineer.Experiences = engineerExperiences
 	}
 
-	updatedEngineer, err := s.UpdateEngineer(*newEngineer)
+	updatedEngineer, err := s.UpdateEngineer(*newEngineer, userId)
 
 	if err != nil {
 		return nil, err
@@ -140,8 +137,8 @@ func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, user
 
 }
 
-func (s *engineerService) UpdateEngineer(engineerData models.EngineerModel) (*models.EngineerModel, error) {
-	currentEngineer, err := s.repo.GetEngineerByID(engineerData.UserId)
+func (s *engineerService) UpdateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error) {
+	currentEngineer, err := s.repo.GetEngineerByID(userId)
 
 	if err != nil {
 		return nil, err
@@ -307,4 +304,34 @@ func (s *engineerService) CreateEngineerExperience(experienceData models.Enginee
 	}
 
 	return experience, nil
+}
+
+func (s *engineerService) UpdateEducation(educationData models.Education, userId uuid.UUID) (*models.Education, error) {
+	if educationData.Degree == "" {
+		return nil, errors.New("education degree is required")
+	}
+
+	if educationData.Institute == "" {
+		return nil, errors.New("education institute is required")
+	}
+
+	if educationData.Branch == "" {
+		return nil, errors.New("education branch is required")
+	}
+
+	if educationData.YearOfPassing == 0 {
+		return nil, errors.New("education year of passing is required")
+	}
+
+	if educationData.CGPA == 0 {
+		return nil, errors.New("education cgpa is required")
+	}
+
+	education, err := s.repo.UpdateEducation(&educationData, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return education, nil
 }
