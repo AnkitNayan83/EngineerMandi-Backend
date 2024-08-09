@@ -11,11 +11,11 @@ type EngineerModel struct {
 	User            User                 `gorm:"foreignKey:UserId" json:"user"`
 	Resume          string               `json:"resume"`
 	Specializations []Specialization     `gorm:"many2many:engineer_specializations" json:"specializations"`
-	Experiences     []EngineerExperience `gorm:"foreignKey:EngineerID;references:UserId" json:"experiences"`
-	Skills          []EngineerSkills     `gorm:"foreignKey:EngineerID;references:UserId" json:"skills"`
-	Education       []Education          `gorm:"foreignKey:EngineerID;references:UserId" json:"education"`
-	Certifications  []Certification      `gorm:"foreignKey:EngineerID;references:UserId" json:"certifications"`
-	Projects        []Project            `gorm:"foreignKey:EngineerID;references:UserId" json:"projects"`
+	Experiences     []EngineerExperience `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"experiences"`
+	Skills          []EngineerSkills     `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"skills"`
+	Education       []Education          `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"education"`
+	Certifications  []Certification      `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"certifications"`
+	Projects        []Project            `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"projects"`
 }
 
 type ProficiencyLevelEnum string

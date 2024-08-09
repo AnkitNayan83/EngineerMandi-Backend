@@ -61,7 +61,7 @@ func (ctrl *EngineerController) CreateEngineer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": engineer})
 }
 
-func (ctrl *EngineerController) UpdateEngineer(c *gin.Context) {
+func (ctrl *EngineerController) UpdateOrAddEngineerExperience(c *gin.Context) {
 
 	user, exists := c.Get("userID")
 
@@ -85,22 +85,41 @@ func (ctrl *EngineerController) UpdateEngineer(c *gin.Context) {
 		return
 	}
 
-	engineerData := models.EngineerModel{}
-	err = c.ShouldBindJSON(&engineerData)
+	_, err = ctrl.engineerService.GetEngineerByID(userID)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+		return
+	}
+
+	engineerExperienceData := []models.EngineerExperience{}
+	err = c.ShouldBindJSON(&engineerExperienceData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "empty data in the request"})
 		return
 	}
 
-	engineer, err := ctrl.engineerService.UpdateEngineer(engineerData, userID)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	for _, exp := range engineerExperienceData {
+		if exp.ID == uuid.Nil {
+			newExp, err := ctrl.engineerService.CreateEngineerExperience(exp, userID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			err = ctrl.engineerService.AddExperienceToEngineer(newExp.ID, userID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+		} else {
+			_, err := ctrl.engineerService.UpdateEngineerExperience(exp, userID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+		}
 	}
 
-	engineer.User = models.User{}
-
-	c.JSON(http.StatusOK, gin.H{"data": engineer})
+	c.JSON(http.StatusOK, gin.H{"message": "experiences updated successfully"})
 }
