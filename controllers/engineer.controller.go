@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
@@ -102,17 +103,13 @@ func (ctrl *EngineerController) UpdateOrAddEngineerExperience(c *gin.Context) {
 
 	for _, exp := range engineerExperienceData {
 		if exp.ID == uuid.Nil {
-			newExp, err := ctrl.engineerService.CreateEngineerExperience(exp, userID)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			err = ctrl.engineerService.AddExperienceToEngineer(newExp.ID, userID)
+			_, err := ctrl.engineerService.CreateEngineerExperience(exp, userID)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 		} else {
+			log.Println(exp)
 			_, err := ctrl.engineerService.UpdateEngineerExperience(exp, userID)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

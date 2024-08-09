@@ -495,6 +495,7 @@ func (r *engineerRepository) GetEngineerExperienceByID(id uuid.UUID, engineerId 
 }
 
 func (r *engineerRepository) UpdateEngineerExperience(engineerExperienceData *models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error) {
+
 	err := r.DB.Model(&models.EngineerExperience{}).Where("id = ? AND engineer_id = ?", engineerExperienceData.ID, engineerId).Updates(&engineerExperienceData).Error
 
 	if err != nil {

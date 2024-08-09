@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"log"
 
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"github.com/AnkitNayan83/EngineerMandi-Backend/repositories"
@@ -562,9 +563,18 @@ func (s *engineerService) UpdateEngineerExperience(experienceData models.Enginee
 		return nil, errors.New("experience start date is required")
 	}
 
-	if !experienceData.IsCurrent && experienceData.EndDate.IsZero() {
-		return nil, errors.New("experience end date is required for a past experience")
+	if !experienceData.IsCurrent {
+		if experienceData.EndDate.IsZero() {
+
+			return nil, errors.New("experience end date is required for a past experience")
+		}
+		if experienceData.EndDate.Before(experienceData.StartDate) {
+			return nil, errors.New("experience end date should be after start date")
+		}
+
 	}
+
+	log.Println(experienceData.Description)
 
 	experience, err := s.repo.UpdateEngineerExperience(&experienceData, userId)
 

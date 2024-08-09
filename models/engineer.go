@@ -75,8 +75,8 @@ type Project struct {
 type ProjectUrl struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	ProjectID uuid.UUID `gorm:"type:uuid;not null;index" json:"projectId"`
-	Url       string    `gorm:"not null;uniqueIndex:idx_projectid_url" json:"url"`
-	Type      string    `gorm:"not null;uniqueIndex:idx_projectid_type" json:"type"`
+	Url       string    `gorm:"not null" json:"url"`
+	Type      string    `gorm:"not null" json:"type"`
 }
 
 type EngineerExperience struct {
