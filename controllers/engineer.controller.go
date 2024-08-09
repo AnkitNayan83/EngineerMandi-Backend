@@ -86,13 +86,6 @@ func (ctrl *EngineerController) UpdateOrAddEngineerExperience(c *gin.Context) {
 		return
 	}
 
-	_, err = ctrl.engineerService.GetEngineerByID(userID)
-
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
-		return
-	}
-
 	engineerExperienceData := []models.EngineerExperience{}
 	err = c.ShouldBindJSON(&engineerExperienceData)
 
@@ -119,4 +112,78 @@ func (ctrl *EngineerController) UpdateOrAddEngineerExperience(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "experiences updated successfully"})
+}
+
+func (ctrl *EngineerController) RemoveExperience(c *gin.Context) {
+
+	user, exists := c.Get("userID")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found"})
+		return
+	}
+
+	userIDStr, ok := user.(string)
+
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	engineerExperienceData := models.EngineerExperience{}
+	err = c.ShouldBindJSON(&engineerExperienceData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty data in the request"})
+		return
+	}
+
+	err = ctrl.engineerService.RemoveEngineerExperience(engineerExperienceData.ID, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "experience removed successfully"})
+}
+
+func (ctrl *EngineerController) GetEngineerExperiences(c *gin.Context) {
+
+	user, exists := c.Get("userID")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found"})
+		return
+	}
+
+	userIDStr, ok := user.(string)
+
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	experiences, err := ctrl.engineerService.GetEngineerExperiences(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": experiences})
 }

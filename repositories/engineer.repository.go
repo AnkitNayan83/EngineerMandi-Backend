@@ -14,42 +14,36 @@ type EngineerRepository interface {
 	GetEngineerByID(id uuid.UUID) (*models.EngineerModel, error)
 
 	CreateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
-	GetEngineerSkillByID(skillId uuid.UUID, engineeerId uuid.UUID) (*models.EngineerSkills, error)
+	GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error)
 	UpdateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
 	RemoveEngineerSkill(id uuid.UUID, userId uuid.UUID) error
-	AddEngineerSkillToEngineer(engineerSkill models.EngineerSkills, engineerId uuid.UUID) error
 
 	CreateProject(projectData *models.Project, engineerId uuid.UUID) (*models.Project, error)
-	GetProjectByID(id uuid.UUID) (*models.Project, error)
+	GetProjects(engineerId uuid.UUID) ([]models.Project, error)
 	UpdateProject(projectData *models.Project, engineerId uuid.UUID) (*models.Project, error)
 	RemoveProject(id uuid.UUID, userId uuid.UUID) error
-	AddProjectToEngineer(project models.Project, engineerId uuid.UUID) error
 
 	CreateSkill(skillData *models.Skill) (*models.Skill, error)
 	GetSkillByID(id uuid.UUID) (*models.Skill, error)
 
 	CreateSpecialization(specializationData *models.Specialization) (*models.Specialization, error)
-	GetSpecializationByID(id uuid.UUID) (*models.Specialization, error)
+	GetSpecializations(engineerId uuid.UUID) ([]models.Specialization, error)
 	RemoveSpecializationFromEngineer(id uuid.UUID, engineerId uuid.UUID) error
-	AddSpecializationToEngineer(specializationId uuid.UUID, engineerId uuid.UUID) error
 
 	CreateEducation(educationData *models.Education, engineerId uuid.UUID) (*models.Education, error)
-	GetEducationByID(id uuid.UUID, engineerId uuid.UUID) (*models.Education, error)
+	GetEducations(engineerId uuid.UUID) ([]models.Education, error)
 	UpdateEducation(educationData *models.Education, engineerId uuid.UUID) (*models.Education, error)
 	RemoveEducation(id uuid.UUID, userId uuid.UUID) error
-	AddEducationToEngineer(education models.Education, engineerId uuid.UUID) error
 
 	CreateCertification(certificationData *models.Certification, engineerId uuid.UUID) (*models.Certification, error)
-	GetCertificationByID(id uuid.UUID) (*models.Certification, error)
+	GetCertifications(engineerId uuid.UUID) ([]models.Certification, error)
 	UpdateCertification(certificationData *models.Certification, engineerId uuid.UUID) (*models.Certification, error)
 	RemoveCertification(id uuid.UUID, userId uuid.UUID) error
-	AddCertificationToEngineer(certification models.Certification, engineerId uuid.UUID) error
 
 	CreateEngineerExperience(engineerExperienceData *models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error)
-	GetEngineerExperienceByID(id uuid.UUID, engineerId uuid.UUID) (*models.EngineerExperience, error)
+	GetEngineerExperiences(engineerId uuid.UUID) ([]models.EngineerExperience, error)
 	UpdateEngineerExperience(engineerExperienceData *models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error)
 	RemoveEngineerExperience(id uuid.UUID, userId uuid.UUID) error
-	AddEngineerExperienceToEngineer(engineerExperience uuid.UUID, engineerId uuid.UUID) error
 }
 
 type engineerRepository struct {
@@ -121,17 +115,17 @@ func (r *engineerRepository) CreateEngineerSkill(engineerSkillData *models.Engin
 	return &engineerSkill, nil
 }
 
-func (r *engineerRepository) GetEngineerSkillByID(skillId uuid.UUID, engineerId uuid.UUID) (*models.EngineerSkills, error) {
+func (r *engineerRepository) GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error) {
 
-	var engineerSkill models.EngineerSkills
+	var engineerSkill []models.EngineerSkills
 
-	resp := r.DB.Where("skill_id = ? AND engineer_id = ?", skillId, engineerId).First(&engineerSkill)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&engineerSkill)
 
 	if resp.Error != nil {
 		return nil, resp.Error
 	}
 
-	return &engineerSkill, nil
+	return engineerSkill, nil
 }
 
 func (r *engineerRepository) UpdateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error) {
@@ -146,16 +140,6 @@ func (r *engineerRepository) UpdateEngineerSkill(engineerSkillData *models.Engin
 
 func (r *engineerRepository) RemoveEngineerSkill(id uuid.UUID, userId uuid.UUID) error {
 	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.EngineerSkills{}).Error
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *engineerRepository) AddEngineerSkillToEngineer(engineerSkill models.EngineerSkills, engineerId uuid.UUID) error {
-	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerId).Association("Skills").Append(&engineerSkill)
 
 	if err != nil {
 		return err
@@ -214,17 +198,17 @@ func (r *engineerRepository) CreateProject(projectData *models.Project, engineer
 	return &project, nil
 }
 
-func (r *engineerRepository) GetProjectByID(id uuid.UUID) (*models.Project, error) {
+func (r *engineerRepository) GetProjects(engineerId uuid.UUID) ([]models.Project, error) {
 
-	var project models.Project
+	var project []models.Project
 
-	resp := r.DB.Where("id = ?", id).First(&project)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&project)
 
 	if resp.Error != nil {
 		return nil, resp.Error
 	}
 
-	return &project, nil
+	return project, nil
 }
 
 func (r *engineerRepository) UpdateProject(projectData *models.Project, engineerId uuid.UUID) (*models.Project, error) {
@@ -239,16 +223,6 @@ func (r *engineerRepository) UpdateProject(projectData *models.Project, engineer
 
 func (r *engineerRepository) RemoveProject(id uuid.UUID, userId uuid.UUID) error {
 	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.Project{}).Error
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *engineerRepository) AddProjectToEngineer(project models.Project, engineerId uuid.UUID) error {
-	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerId).Association("Projects").Append(&project)
 
 	if err != nil {
 		return err
@@ -301,31 +275,21 @@ func (r *engineerRepository) CreateSpecialization(specializationData *models.Spe
 	return &specialization, nil
 }
 
-func (r *engineerRepository) GetSpecializationByID(id uuid.UUID) (*models.Specialization, error) {
+func (r *engineerRepository) GetSpecializations(engineerId uuid.UUID) ([]models.Specialization, error) {
 
-	var specialization models.Specialization
+	var specialization []models.Specialization
 
-	resp := r.DB.Where("id = ?", id).First(&specialization)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&specialization)
 
 	if resp.Error != nil {
 		return nil, resp.Error
 	}
 
-	return &specialization, nil
+	return specialization, nil
 }
 
 func (r *engineerRepository) RemoveSpecializationFromEngineer(id uuid.UUID, engineerId uuid.UUID) error {
 	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerId).Association("Specializations").Delete(&models.Specialization{ID: id})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *engineerRepository) AddSpecializationToEngineer(specializationId uuid.UUID, engineerId uuid.UUID) error {
-	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerId).Association("Specializations").Append(&models.Specialization{ID: specializationId})
 
 	if err != nil {
 		return err
@@ -353,17 +317,17 @@ func (r *engineerRepository) CreateEducation(educationData *models.Education, en
 	return &education, nil
 }
 
-func (r *engineerRepository) GetEducationByID(id uuid.UUID, engineerId uuid.UUID) (*models.Education, error) {
+func (r *engineerRepository) GetEducations(engineerId uuid.UUID) ([]models.Education, error) {
 
-	var education models.Education
+	var educations []models.Education
 
-	resp := r.DB.Where("id = ? AND engineer_id = ?", id, engineerId).First(&education)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&educations)
 
 	if resp.Error != nil {
 		return nil, resp.Error
 	}
 
-	return &education, nil
+	return educations, nil
 }
 
 func (r *engineerRepository) UpdateEducation(educationData *models.Education, engineerId uuid.UUID) (*models.Education, error) {
@@ -378,16 +342,6 @@ func (r *engineerRepository) UpdateEducation(educationData *models.Education, en
 
 func (r *engineerRepository) RemoveEducation(id uuid.UUID, userId uuid.UUID) error {
 	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.Education{}).Error
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *engineerRepository) AddEducationToEngineer(education models.Education, engineerId uuid.UUID) error {
-	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerId).Association("Education").Append(&education)
 
 	if err != nil {
 		return err
@@ -416,17 +370,16 @@ func (r *engineerRepository) CreateCertification(certificationData *models.Certi
 	return &certification, nil
 }
 
-func (r *engineerRepository) GetCertificationByID(id uuid.UUID) (*models.Certification, error) {
+func (r *engineerRepository) GetCertifications(engineerId uuid.UUID) ([]models.Certification, error) {
+	var certification []models.Certification
 
-	var certification models.Certification
-
-	resp := r.DB.Where("id = ?", id).First(&certification)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&certification)
 
 	if resp.Error != nil {
 		return nil, resp.Error
 	}
 
-	return &certification, nil
+	return certification, nil
 }
 
 func (r *engineerRepository) UpdateCertification(certificationData *models.Certification, engineerId uuid.UUID) (*models.Certification, error) {
@@ -441,16 +394,6 @@ func (r *engineerRepository) UpdateCertification(certificationData *models.Certi
 
 func (r *engineerRepository) RemoveCertification(id uuid.UUID, userId uuid.UUID) error {
 	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.Certification{}).Error
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *engineerRepository) AddCertificationToEngineer(certification models.Certification, engineerId uuid.UUID) error {
-	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerId).Association("Certifications").Append(&certification)
 
 	if err != nil {
 		return err
@@ -481,17 +424,17 @@ func (r *engineerRepository) CreateEngineerExperience(engineerExperienceData *mo
 	return &engineerExperience, nil
 }
 
-func (r *engineerRepository) GetEngineerExperienceByID(id uuid.UUID, engineerId uuid.UUID) (*models.EngineerExperience, error) {
+func (r *engineerRepository) GetEngineerExperiences(engineerId uuid.UUID) ([]models.EngineerExperience, error) {
+	// fetch all experiences of the engineer
+	var engineerExperience []models.EngineerExperience
 
-	var engineerExperience models.EngineerExperience
-
-	resp := r.DB.Where("id = ? AND engineer_id = ?", id, engineerId).First(&engineerExperience)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&engineerExperience)
 
 	if resp.Error != nil {
 		return nil, resp.Error
 	}
 
-	return &engineerExperience, nil
+	return engineerExperience, nil
 }
 
 func (r *engineerRepository) UpdateEngineerExperience(engineerExperienceData *models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error) {
@@ -507,23 +450,6 @@ func (r *engineerRepository) UpdateEngineerExperience(engineerExperienceData *mo
 
 func (r *engineerRepository) RemoveEngineerExperience(id uuid.UUID, userId uuid.UUID) error {
 	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.EngineerExperience{}).Error
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *engineerRepository) AddEngineerExperienceToEngineer(engineerExperienceId uuid.UUID, engineerId uuid.UUID) error {
-
-	_, err := r.GetEngineerExperienceByID(engineerExperienceId, engineerId)
-
-	if err != nil {
-		return err
-	}
-
-	err = r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", engineerId).Association("Experiences").Append(&models.EngineerExperience{ID: engineerExperienceId})
 
 	if err != nil {
 		return err

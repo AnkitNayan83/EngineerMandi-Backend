@@ -14,34 +14,33 @@ type EngineerService interface {
 	GetEngineerByID(userId uuid.UUID) (*models.EngineerModel, error)
 
 	CreateEngineerSkill(engineerSkillData models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
+	GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error)
 	UpdateEngineerSkill(engineerSkillData models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
-	RemoveEngineerSkill(skillId uuid.UUID, userId uuid.UUID) error
-	AddEngineerSkillToEngineer(engineerSkill models.EngineerSkills, userId uuid.UUID) error
+	RemoveEngineerSkill(id uuid.UUID, userId uuid.UUID) error
 
-	CreateEducation(educationData models.Education, userId uuid.UUID) (*models.Education, error)
-	UpdateEducation(educationData models.Education, userId uuid.UUID) (*models.Education, error)
-	RemoveEducation(educationId uuid.UUID, userId uuid.UUID) error
-	AddEducationToEngineer(education models.Education, userId uuid.UUID) error
+	CreateEducation(educationData models.Education, engineerId uuid.UUID) (*models.Education, error)
+	GetEducations(engineerId uuid.UUID) ([]models.Education, error)
+	UpdateEducation(educationData models.Education, engineerId uuid.UUID) (*models.Education, error)
+	RemoveEducation(id uuid.UUID, userId uuid.UUID) error
 
-	CreateCertification(certificationData models.Certification, userId uuid.UUID) (*models.Certification, error)
-	UpdateCertification(certificationData models.Certification, userId uuid.UUID) (*models.Certification, error)
-	AddCertificationToEngineer(certification models.Certification, userId uuid.UUID) error
-	RemoveCertification(certificationId uuid.UUID, userId uuid.UUID) error
+	CreateCertification(certificationData models.Certification, engineerId uuid.UUID) (*models.Certification, error)
+	GetCertifications(engineerId uuid.UUID) ([]models.Certification, error)
+	UpdateCertification(certificationData models.Certification, engineerId uuid.UUID) (*models.Certification, error)
+	RemoveCertification(id uuid.UUID, userId uuid.UUID) error
 
-	CreateProject(projectData models.Project, userId uuid.UUID) (*models.Project, error)
-	UpdateProject(projectData models.Project, userId uuid.UUID) (*models.Project, error)
-	AddProjectToEngineer(project models.Project, userId uuid.UUID) error
-	RemoveProject(projectId uuid.UUID, userId uuid.UUID) error
+	CreateProject(projectData models.Project, engineerId uuid.UUID) (*models.Project, error)
+	GetProjects(engineerId uuid.UUID) ([]models.Project, error)
+	UpdateProject(projectData models.Project, engineerId uuid.UUID) (*models.Project, error)
+	RemoveProject(id uuid.UUID, userId uuid.UUID) error
 
 	CreateSpecialization(specializationData models.Specialization) (*models.Specialization, error)
-	AddSpecializationToEngineer(specializationId uuid.UUID, userId uuid.UUID) error
-	RemoveSpecialization(specializationId uuid.UUID, userId uuid.UUID) error
+	GetSpecializations(engineerId uuid.UUID) ([]models.Specialization, error)
+	RemoveSpecialization(id uuid.UUID, userId uuid.UUID) error
 
-	CreateEngineerExperience(experienceData models.EngineerExperience, userId uuid.UUID) (*models.EngineerExperience, error)
-	UpdateEngineerExperience(experienceData models.EngineerExperience, userId uuid.UUID) (*models.EngineerExperience, error)
-	AddExperienceToEngineer(experience uuid.UUID, userId uuid.UUID) error
-	RemoveEngineerExperience(experienceId uuid.UUID, userId uuid.UUID) error
-	GetEngineerExperienceByID(experienceId uuid.UUID, engineerId uuid.UUID) (*models.EngineerExperience, error)
+	CreateEngineerExperience(engineerExperienceData models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error)
+	GetEngineerExperiences(engineerId uuid.UUID) ([]models.EngineerExperience, error)
+	UpdateEngineerExperience(engineerExperienceData models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error)
+	RemoveEngineerExperience(id uuid.UUID, userId uuid.UUID) error
 }
 
 type engineerService struct {
@@ -196,8 +195,8 @@ func (s *engineerService) UpdateEngineer(engineerData models.EngineerModel, user
 
 }
 
-func (s *engineerService) GetEngineerSkillByID(skillId uuid.UUID, engineerId uuid.UUID) (*models.EngineerSkills, error) {
-	engineerSkill, err := s.repo.GetEngineerSkillByID(skillId, engineerId)
+func (s *engineerService) GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error) {
+	engineerSkill, err := s.repo.GetEngineerSkills(engineerId)
 
 	if err != nil {
 		return nil, err
@@ -248,19 +247,8 @@ func (s *engineerService) RemoveEngineerSkill(skillId uuid.UUID, userId uuid.UUI
 	return nil
 }
 
-func (s *engineerService) AddEngineerSkillToEngineer(engineerSkill models.EngineerSkills, userId uuid.UUID) error {
-
-	err := s.repo.AddEngineerSkillToEngineer(engineerSkill, userId)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *engineerService) GetEducationByID(educationId uuid.UUID, engineerId uuid.UUID) (*models.Education, error) {
-	education, err := s.repo.GetEducationByID(educationId, engineerId)
+func (s *engineerService) GetEducations(engineerId uuid.UUID) ([]models.Education, error) {
+	education, err := s.repo.GetEducations(engineerId)
 
 	if err != nil {
 		return nil, err
@@ -343,15 +331,14 @@ func (s *engineerService) RemoveEducation(educationId uuid.UUID, userId uuid.UUI
 	return nil
 }
 
-func (s *engineerService) AddEducationToEngineer(education models.Education, userId uuid.UUID) error {
-
-	err := s.repo.AddEducationToEngineer(education, userId)
+func (s *engineerService) GetCertifications(engineerId uuid.UUID) ([]models.Certification, error) {
+	certifications, err := s.repo.GetCertifications(engineerId)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return certifications, nil
 }
 
 func (s *engineerService) CreateCertification(certificationData models.Certification, userId uuid.UUID) (*models.Certification, error) {
@@ -398,17 +385,6 @@ func (s *engineerService) UpdateCertification(certificationData models.Certifica
 	return certificate, nil
 }
 
-func (s *engineerService) AddCertificationToEngineer(certification models.Certification, userId uuid.UUID) error {
-
-	err := s.repo.AddCertificationToEngineer(certification, userId)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *engineerService) RemoveCertification(certificationId uuid.UUID, userId uuid.UUID) error {
 	if certificationId == uuid.Nil {
 		return errors.New("certification id is required")
@@ -421,6 +397,16 @@ func (s *engineerService) RemoveCertification(certificationId uuid.UUID, userId 
 	}
 
 	return nil
+}
+
+func (s *engineerService) GetProjects(engineerId uuid.UUID) ([]models.Project, error) {
+	projects, err := s.repo.GetProjects(engineerId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }
 
 func (s *engineerService) CreateProject(projectData models.Project, userId uuid.UUID) (*models.Project, error) {
@@ -449,17 +435,6 @@ func (s *engineerService) UpdateProject(projectData models.Project, userId uuid.
 	}
 
 	return project, nil
-}
-
-func (s *engineerService) AddProjectToEngineer(project models.Project, userId uuid.UUID) error {
-
-	err := s.repo.AddProjectToEngineer(project, userId)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (s *engineerService) RemoveProject(projectId uuid.UUID, userId uuid.UUID) error {
@@ -491,17 +466,6 @@ func (s *engineerService) CreateSpecialization(specializationData models.Special
 	return specialization, nil
 }
 
-func (s *engineerService) AddSpecializationToEngineer(specializationId uuid.UUID, userId uuid.UUID) error {
-
-	err := s.repo.AddSpecializationToEngineer(specializationId, userId)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *engineerService) RemoveSpecialization(specializationId uuid.UUID, userId uuid.UUID) error {
 	if specializationId == uuid.Nil {
 		return errors.New("specialization id is required")
@@ -514,6 +478,16 @@ func (s *engineerService) RemoveSpecialization(specializationId uuid.UUID, userI
 	}
 
 	return nil
+}
+
+func (s *engineerService) GetSpecializations(engineerId uuid.UUID) ([]models.Specialization, error) {
+	specializations, err := s.repo.GetSpecializations(engineerId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return specializations, nil
 }
 
 func (s *engineerService) CreateEngineerExperience(experienceData models.EngineerExperience, userId uuid.UUID) (*models.EngineerExperience, error) {
@@ -585,17 +559,6 @@ func (s *engineerService) UpdateEngineerExperience(experienceData models.Enginee
 	return experience, nil
 }
 
-func (s *engineerService) AddExperienceToEngineer(experience uuid.UUID, userId uuid.UUID) error {
-
-	err := s.repo.AddEngineerExperienceToEngineer(experience, userId)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *engineerService) RemoveEngineerExperience(experienceId uuid.UUID, userId uuid.UUID) error {
 	if experienceId == uuid.Nil {
 		return errors.New("experience id is required")
@@ -610,8 +573,8 @@ func (s *engineerService) RemoveEngineerExperience(experienceId uuid.UUID, userI
 	return nil
 }
 
-func (s *engineerService) GetEngineerExperienceByID(experienceId uuid.UUID, engineerId uuid.UUID) (*models.EngineerExperience, error) {
-	experience, err := s.repo.GetEngineerExperienceByID(experienceId, engineerId)
+func (s *engineerService) GetEngineerExperiences(engineerId uuid.UUID) ([]models.EngineerExperience, error) {
+	experience, err := s.repo.GetEngineerExperiences(engineerId)
 
 	if err != nil {
 		return nil, err
