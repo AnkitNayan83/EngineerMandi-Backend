@@ -31,6 +31,7 @@ type EngineerSkills struct {
 	SkillID           uuid.UUID            `gorm:"type:uuid;primaryKey" json:"skillId"`
 	ProficiencyLevel  ProficiencyLevelEnum `gorm:"type:VARCHAR(20)" json:"proficiencyLevel"`
 	YearsOfExperience float64              `gorm:"default:0.0" json:"yearsOfExperience"`
+	Skill             Skill                `gorm:"foreignKey:SkillID;references:ID" json:"skill"`
 }
 
 type Skill struct {

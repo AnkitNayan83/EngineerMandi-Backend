@@ -119,7 +119,7 @@ func (r *engineerRepository) GetEngineerSkills(engineerId uuid.UUID) ([]models.E
 
 	var engineerSkill []models.EngineerSkills
 
-	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&engineerSkill)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Preload("Skill").Find(&engineerSkill)
 
 	if resp.Error != nil {
 		return nil, resp.Error
@@ -305,6 +305,7 @@ func (r *engineerRepository) CreateEducation(educationData *models.Education, en
 		Institute:     educationData.Institute,
 		YearOfPassing: educationData.YearOfPassing,
 		CGPA:          educationData.CGPA,
+		Branch:        educationData.Branch,
 		EngineerID:    engineerId,
 	}
 

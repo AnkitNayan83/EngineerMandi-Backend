@@ -308,6 +308,8 @@ func (s *engineerService) UpdateEducation(educationData models.Education, userId
 		return nil, errors.New("education cgpa is required")
 	}
 
+	log.Print(educationData)
+
 	education, err := s.repo.UpdateEducation(&educationData, userId)
 
 	if err != nil {
