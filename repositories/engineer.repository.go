@@ -12,6 +12,7 @@ type EngineerRepository interface {
 	CreateEngineer(engineerData *models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error)
 	UpdateEngineer(engineerData *models.EngineerModel) (*models.EngineerModel, error)
 	GetEngineerByID(id uuid.UUID) (*models.EngineerModel, error)
+	UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error
 
 	CreateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
 	GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error)
@@ -83,11 +84,22 @@ func (r *engineerRepository) UpdateEngineer(engineerData *models.EngineerModel) 
 	return engineerData, nil
 }
 
+func (r *engineerRepository) UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error {
+
+	err := r.DB.Model(&models.EngineerModel{}).Where("user_id = ?", userId).Update("resume", resumeUrl).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *engineerRepository) GetEngineerByID(id uuid.UUID) (*models.EngineerModel, error) {
 
 	var engineer models.EngineerModel
 
-	resp := r.DB.Where("user_id = ?", id).First(&engineer)
+	resp := r.DB.Preload("User").Preload("Specializations").Preload("Experiences").Preload("Skills").Preload("Education").Preload("Certifications").Preload("Projects").Where("user_id = ?", id).First(&engineer)
 
 	if resp.Error != nil {
 		return nil, resp.Error

@@ -19,6 +19,50 @@ func NewEngineerController(engineerService services.EngineerService) *EngineerCo
 	return &EngineerController{engineerService: engineerService}
 }
 
+func (ctrl *EngineerController) GetEngineer(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	engineer, err := ctrl.engineerService.GetEngineerByID(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": engineer})
+}
+
+func (ctrl *EngineerController) UpdateEngineerResume(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	engineerData := models.EngineerModel{}
+	err = c.ShouldBindJSON(&engineerData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = ctrl.engineerService.UpdateEngineerResume(engineerData.Resume, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "resume updated successfully"})
+}
+
 func (ctrl *EngineerController) CreateEngineer(c *gin.Context) {
 
 	userID, err := utils.GetUserFromRequest(c)

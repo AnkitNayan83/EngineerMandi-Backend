@@ -12,6 +12,7 @@ import (
 type EngineerService interface {
 	CreateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error)
 	GetEngineerByID(userId uuid.UUID) (*models.EngineerModel, error)
+	UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error
 
 	CreateEngineerSkill(engineerSkillData models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
 	GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error)
@@ -62,12 +63,18 @@ func (s *engineerService) GetEngineerByID(userId uuid.UUID) (*models.EngineerMod
 	return engineer, nil
 }
 
+func (s *engineerService) UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error {
+
+	err := s.repo.UpdateEngineerResume(resumeUrl, userId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error) {
-	var skills []models.EngineerSkills
-	var educations []models.Education
-	var certifications []models.Certification
-	var projects []models.Project
-	var engineerExperiences []models.EngineerExperience
 
 	if engineerData.Resume == "" {
 		return nil, errors.New("engineer resume is required")
@@ -79,120 +86,7 @@ func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, user
 		return nil, err
 	}
 
-	if len(engineerData.Skills) > 0 {
-		for _, skill := range engineerData.Skills {
-			if skill.SkillID != uuid.Nil {
-				engineerSkill, err := s.CreateEngineerSkill(skill, userId)
-
-				if err != nil {
-					return nil, err
-				}
-
-				skills = append(skills, *engineerSkill)
-			} else {
-				return nil, errors.New("skill id not found")
-			}
-		}
-		newEngineer.Skills = skills
-	}
-
-	if len(engineerData.Education) > 0 {
-		for _, education := range engineerData.Education {
-			newEducation, err := s.CreateEducation(education, userId)
-
-			if err != nil {
-				return nil, err
-			}
-
-			educations = append(educations, *newEducation)
-
-		}
-		newEngineer.Education = educations
-	}
-
-	if len(engineerData.Certifications) > 0 {
-		for _, certification := range engineerData.Certifications {
-			newCertification, err := s.CreateCertification(certification, userId)
-
-			if err != nil {
-				return nil, err
-			}
-
-			certifications = append(certifications, *newCertification)
-		}
-		newEngineer.Certifications = certifications
-	}
-
-	if len(engineerData.Projects) > 0 {
-		for _, project := range engineerData.Projects {
-			newProject, err := s.CreateProject(project, userId)
-
-			if err != nil {
-				return nil, err
-			}
-
-			projects = append(projects, *newProject)
-		}
-		newEngineer.Projects = projects
-	}
-
-	if len(engineerData.Experiences) > 0 {
-		for _, experience := range engineerData.Experiences {
-			newExperience, err := s.CreateEngineerExperience(experience, userId)
-
-			if err != nil {
-				return nil, err
-			}
-
-			engineerExperiences = append(engineerExperiences, *newExperience)
-		}
-		newEngineer.Experiences = engineerExperiences
-	}
-
-	updatedEngineer, err := s.UpdateEngineer(*newEngineer, userId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedEngineer, nil
-
-}
-
-func (s *engineerService) UpdateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error) {
-	currentEngineer, err := s.repo.GetEngineerByID(userId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(engineerData.Skills) > 0 {
-		currentEngineer.Skills = engineerData.Skills
-	}
-
-	if len(engineerData.Education) > 0 {
-		currentEngineer.Education = engineerData.Education
-	}
-
-	if len(engineerData.Certifications) > 0 {
-		currentEngineer.Certifications = engineerData.Certifications
-	}
-
-	if len(engineerData.Projects) > 0 {
-		currentEngineer.Projects = engineerData.Projects
-	}
-
-	if len(engineerData.Experiences) > 0 {
-		currentEngineer.Experiences = engineerData.Experiences
-	}
-
-	engineer, err := s.repo.UpdateEngineer(currentEngineer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return engineer, nil
+	return newEngineer, nil
 
 }
 
