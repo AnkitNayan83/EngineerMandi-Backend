@@ -87,7 +87,6 @@ func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, user
 	}
 
 	return newEngineer, nil
-
 }
 
 func (s *engineerService) GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error) {
