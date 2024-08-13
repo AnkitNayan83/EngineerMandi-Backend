@@ -16,16 +16,32 @@ func EngineerRoutes(router *gin.RouterGroup, engineerController *controllers.Eng
 
 	// Experience Routes
 	router.PATCH(fmt.Sprint(pathPrefix+"/experience/append-experience"), engineerController.UpdateOrAddEngineerExperience)
-	router.DELETE(fmt.Sprint(pathPrefix+"/experience/remove-experience"), engineerController.RemoveExperience)
+	router.DELETE(fmt.Sprint(pathPrefix+"/experience/:id"), engineerController.RemoveExperience)
 	router.GET(fmt.Sprint(pathPrefix+"/experience"), engineerController.GetEngineerExperiences)
 
 	//Education Routes
 	router.PATCH(fmt.Sprint(pathPrefix+"/education/append-education"), engineerController.UpdateOrAddEducation)
-	router.DELETE(fmt.Sprint(pathPrefix+"/education/remove-education"), engineerController.RemoveEducation)
+	router.DELETE(fmt.Sprint(pathPrefix+"/education/:id"), engineerController.RemoveEducation)
 	router.GET(fmt.Sprint(pathPrefix+"/education"), engineerController.GetEngineerEducations)
 
 	//Skill Routes
 	router.PATCH(fmt.Sprint(pathPrefix+"/skill/append-skill"), engineerController.UpdateOrAddEngineerSkill)
-	router.DELETE(fmt.Sprint(pathPrefix+"/skill/remove-skill"), engineerController.RemoveEngineerSkill)
+	router.DELETE(fmt.Sprint(pathPrefix+"/skill/:id"), engineerController.RemoveEngineerSkill)
 	router.GET(fmt.Sprint(pathPrefix+"/skill"), engineerController.GetEngineerSkills)
+
+	//Certification Routes
+	router.PATCH(fmt.Sprint(pathPrefix+"/certification/append-certification"), engineerController.UpdateOrAddEngineerCertification)
+	router.DELETE(fmt.Sprint(pathPrefix+"/certification/:id"), engineerController.RemoveEngineerCertification)
+	router.GET(fmt.Sprint(pathPrefix+"/certification"), engineerController.GetEngineerCertifications)
+
+	//Project Routes
+	router.PATCH(fmt.Sprint(pathPrefix+"/project/append-project"), engineerController.UpdateOrAddEngineerProject)
+	router.DELETE(fmt.Sprint(pathPrefix+"/project/:id"), engineerController.RemoveEngineerProject)
+	router.GET(fmt.Sprint(pathPrefix+"/project"), engineerController.GetEngineerProjects)
+
+	//Specialization Routes
+	router.POST(fmt.Sprint(pathPrefix+"/specialization/append-specialization"), engineerController.AddEngineerSpecailization)
+	router.DELETE(fmt.Sprint(pathPrefix+"/specialization/:id"), engineerController.RemoveEngineerSpecailization)
+	router.GET(fmt.Sprint(pathPrefix+"/specialization"), engineerController.GetEngineerSpecialization)
+
 }

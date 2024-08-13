@@ -35,6 +35,7 @@ type EngineerService interface {
 
 	CreateSpecialization(specializationData models.Specialization) (*models.Specialization, error)
 	GetSpecializations(engineerId uuid.UUID) ([]models.Specialization, error)
+	AddEngineerSpecailization(specializationId uuid.UUID, userId uuid.UUID) error
 	RemoveSpecialization(id uuid.UUID, userId uuid.UUID) error
 
 	CreateEngineerExperience(engineerExperienceData models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error)
@@ -466,6 +467,20 @@ func (s *engineerService) CreateSpecialization(specializationData models.Special
 	}
 
 	return specialization, nil
+}
+
+func (s *engineerService) AddEngineerSpecailization(specializationId uuid.UUID, userId uuid.UUID) error {
+	if specializationId == uuid.Nil {
+		return errors.New("specialization id is required")
+	}
+
+	err := s.repo.AddEngineerSpecailization(specializationId, userId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *engineerService) RemoveSpecialization(specializationId uuid.UUID, userId uuid.UUID) error {

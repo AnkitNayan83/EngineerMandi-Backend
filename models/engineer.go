@@ -69,13 +69,13 @@ type Project struct {
 	ID          uuid.UUID    `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name        string       `gorm:"not null" json:"name"`
 	Description string       `json:"description,omitempty"`
-	ProjectUrls []ProjectUrl `gorm:"foreignKey:ProjectID;references:ID" json:"projectUrls"`
+	ProjectUrls []ProjectUrl `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE;references:ID" json:"projectUrls"`
 	EngineerID  uuid.UUID    `gorm:"type:uuid;not null" json:"engineerId"`
 }
 
 type ProjectUrl struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	ProjectID uuid.UUID `gorm:"type:uuid;not null;index" json:"projectId"`
+	ProjectID uuid.UUID `gorm:"type:uuid;not null;index;constraint:OnDelete:CASCADE;" json:"projectId"`
 	Url       string    `gorm:"not null" json:"url"`
 	Type      string    `gorm:"not null" json:"type"`
 }

@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"github.com/google/uuid"
@@ -29,6 +29,7 @@ type EngineerRepository interface {
 	CreateSpecialization(specializationData *models.Specialization) (*models.Specialization, error)
 	GetSpecializations(engineerId uuid.UUID) ([]models.Specialization, error)
 	RemoveSpecializationFromEngineer(id uuid.UUID, engineerId uuid.UUID) error
+	AddEngineerSpecailization(specializationId uuid.UUID, engineerId uuid.UUID) error
 
 	CreateEducation(educationData *models.Education, engineerId uuid.UUID) (*models.Education, error)
 	GetEducations(engineerId uuid.UUID) ([]models.Education, error)
@@ -96,9 +97,6 @@ func (r *engineerRepository) GetEngineerByID(id uuid.UUID) (*models.EngineerMode
 }
 
 func (r *engineerRepository) CreateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error) {
-
-	log.Println(engineerSkillData.SkillID)
-	log.Println(userId)
 	engineerSkill := models.EngineerSkills{
 		EngineerID:        userId,
 		SkillID:           engineerSkillData.SkillID,
@@ -129,7 +127,7 @@ func (r *engineerRepository) GetEngineerSkills(engineerId uuid.UUID) ([]models.E
 }
 
 func (r *engineerRepository) UpdateEngineerSkill(engineerSkillData *models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error) {
-	err := r.DB.Model(&models.EngineerSkills{}).Where("id = ? AND engineer_id = ?", engineerSkillData.SkillID, userId).Updates(&engineerSkillData).Error
+	err := r.DB.Model(&models.EngineerSkills{}).Where("skill_id = ? AND engineer_id = ?", engineerSkillData.SkillID, userId).Updates(&engineerSkillData).Error
 
 	if err != nil {
 		return nil, err
@@ -139,7 +137,7 @@ func (r *engineerRepository) UpdateEngineerSkill(engineerSkillData *models.Engin
 }
 
 func (r *engineerRepository) RemoveEngineerSkill(id uuid.UUID, userId uuid.UUID) error {
-	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.EngineerSkills{}).Error
+	err := r.DB.Where("skill_id = ? AND engineer_id = ?", id, userId).Delete(&models.EngineerSkills{}).Error
 
 	if err != nil {
 		return err
@@ -202,7 +200,7 @@ func (r *engineerRepository) GetProjects(engineerId uuid.UUID) ([]models.Project
 
 	var project []models.Project
 
-	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&project)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Preload("ProjectUrls").Find(&project)
 
 	if resp.Error != nil {
 		return nil, resp.Error
@@ -212,8 +210,63 @@ func (r *engineerRepository) GetProjects(engineerId uuid.UUID) ([]models.Project
 }
 
 func (r *engineerRepository) UpdateProject(projectData *models.Project, engineerId uuid.UUID) (*models.Project, error) {
-	err := r.DB.Model(&models.Project{}).Where("id = ? AND engineer_id = ?", projectData.ID, engineerId).Updates(&projectData).Error
+	tx := r.DB.Begin()
 
+	err := tx.Model(&models.Project{}).Where("id = ? AND engineer_id = ?", projectData.ID, engineerId).Updates(map[string]interface{}{
+		"name":        projectData.Name,
+		"description": projectData.Description,
+	}).Error
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var existingUrls []models.ProjectUrl
+	err = tx.Where("project_id = ?", projectData.ID).Find(&existingUrls).Error
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	existingUrlsMap := make(map[uuid.UUID]models.ProjectUrl)
+	for _, url := range existingUrls {
+		existingUrlsMap[url.ID] = url
+	}
+
+	for _, projectUrl := range projectData.ProjectUrls {
+		if projectUrl.ID == uuid.Nil {
+			projectUrl.ProjectID = projectData.ID
+			err = tx.Create(&projectUrl).Error
+			if err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+		} else {
+			err = tx.Model(&models.ProjectUrl{}).Where("id = ? AND project_id = ?", projectUrl.ID, projectData.ID).Updates(map[string]interface{}{
+				"url":  projectUrl.Url,
+				"type": projectUrl.Type,
+			}).Error
+
+			if err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+
+			delete(existingUrlsMap, projectUrl.ID)
+		}
+	}
+
+	for _, url := range existingUrlsMap {
+		err = tx.Delete(&url).Error
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	err = tx.Commit().Error
 	if err != nil {
 		return nil, err
 	}
@@ -276,16 +329,37 @@ func (r *engineerRepository) CreateSpecialization(specializationData *models.Spe
 }
 
 func (r *engineerRepository) GetSpecializations(engineerId uuid.UUID) ([]models.Specialization, error) {
+	var specializations []models.Specialization
 
-	var specialization []models.Specialization
-
-	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&specialization)
+	resp := r.DB.Joins("JOIN engineer_specializations ON engineer_specializations.specialization_id = specializations.id").
+		Where("engineer_specializations.engineer_model_user_id = ?", engineerId).
+		Find(&specializations)
 
 	if resp.Error != nil {
 		return nil, resp.Error
 	}
 
-	return specialization, nil
+	return specializations, nil
+}
+
+func (r *engineerRepository) AddEngineerSpecailization(specializationId uuid.UUID, engineerId uuid.UUID) error {
+	var engineer models.EngineerModel
+	if err := r.DB.First(&engineer, "user_id = ?", engineerId).Error; err != nil {
+		return fmt.Errorf("engineer not found: %w", err)
+	}
+
+	// Ensure the specialization exists
+	var specialization models.Specialization
+	if err := r.DB.First(&specialization, "id = ?", specializationId).Error; err != nil {
+		return fmt.Errorf("specialization not found: %w", err)
+	}
+
+	// Append the specialization to the engineer's Specializations association
+	if err := r.DB.Model(&engineer).Association("Specializations").Append(&specialization); err != nil {
+		return fmt.Errorf("failed to add specialization: %w", err)
+	}
+
+	return nil
 }
 
 func (r *engineerRepository) RemoveSpecializationFromEngineer(id uuid.UUID, engineerId uuid.UUID) error {

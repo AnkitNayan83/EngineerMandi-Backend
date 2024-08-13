@@ -94,15 +94,15 @@ func (ctrl *EngineerController) RemoveExperience(c *gin.Context) {
 		return
 	}
 
-	engineerExperienceData := models.EngineerExperience{}
-	err = c.ShouldBindJSON(&engineerExperienceData)
+	engineerExperienceIdStr := c.Params.ByName("id")
+	engineerExperienceId, err := uuid.Parse(engineerExperienceIdStr)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "empty data in the request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid experience id"})
 		return
 	}
 
-	err = ctrl.engineerService.RemoveEngineerExperience(engineerExperienceData.ID, userID)
+	err = ctrl.engineerService.RemoveEngineerExperience(engineerExperienceId, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -175,14 +175,15 @@ func (ctrl *EngineerController) RemoveEducation(c *gin.Context) {
 		return
 	}
 
-	educationData := models.Education{}
-	err = c.ShouldBindJSON(&educationData)
+	educationIdStr := c.Params.ByName("id")
+	educationId, err := uuid.Parse(educationIdStr)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "empty data in the request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid education id"})
+		return
 	}
 
-	err = ctrl.engineerService.RemoveEducation(educationData.ID, userID)
+	err = ctrl.engineerService.RemoveEducation(educationId, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -219,7 +220,7 @@ func (ctrl *EngineerController) UpdateOrAddEngineerSkill(c *gin.Context) {
 		return
 	}
 
-	isNew := c.Params.ByName("isNew")
+	isNew := c.Query("new")
 
 	skillData := models.EngineerSkills{}
 	err = c.ShouldBindJSON(&skillData)
@@ -236,6 +237,7 @@ func (ctrl *EngineerController) UpdateOrAddEngineerSkill(c *gin.Context) {
 			return
 		}
 	} else {
+		log.Print("gg")
 		_, err := ctrl.engineerService.UpdateEngineerSkill(skillData, userID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -254,14 +256,15 @@ func (ctrl *EngineerController) RemoveEngineerSkill(c *gin.Context) {
 		return
 	}
 
-	skillData := models.EngineerSkills{}
-	err = c.ShouldBindJSON(&skillData)
+	skillIdStr := c.Params.ByName("id")
+	skillId, err := uuid.Parse(skillIdStr)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "empty data in the request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid skill id"})
+		return
 	}
 
-	err = ctrl.engineerService.RemoveEngineerSkill(skillData.SkillID, userID)
+	err = ctrl.engineerService.RemoveEngineerSkill(skillId, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -287,4 +290,228 @@ func (ctrl *EngineerController) GetEngineerSkills(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": skills})
+}
+
+func (ctrl *EngineerController) UpdateOrAddEngineerCertification(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	certificationData := models.Certification{}
+	err = c.ShouldBindJSON(&certificationData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	if certificationData.ID == uuid.Nil {
+		_, err := ctrl.engineerService.CreateCertification(certificationData, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		_, err := ctrl.engineerService.UpdateCertification(certificationData, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "certification updated successfully"})
+}
+
+func (ctrl *EngineerController) RemoveEngineerCertification(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	certificationIdStr := c.Params.ByName("id")
+	certificationId, err := uuid.Parse(certificationIdStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid certification id"})
+		return
+	}
+
+	err = ctrl.engineerService.RemoveCertification(certificationId, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "certification removed successfully"})
+}
+
+func (ctrl *EngineerController) GetEngineerCertifications(c *gin.Context) {
+	userId, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		return
+	}
+
+	certifications, err := ctrl.engineerService.GetCertifications(userId)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "certifications not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": certifications})
+}
+
+func (ctrl *EngineerController) UpdateOrAddEngineerProject(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	projectData := models.Project{}
+	err = c.ShouldBindJSON(&projectData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	if projectData.ID == uuid.Nil {
+		_, err := ctrl.engineerService.CreateProject(projectData, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		_, err := ctrl.engineerService.UpdateProject(projectData, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "project updated successfully"})
+}
+
+func (ctrl *EngineerController) RemoveEngineerProject(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	projectIdStr := c.Params.ByName("id")
+	projectId, err := uuid.Parse(projectIdStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid project id"})
+		return
+	}
+
+	err = ctrl.engineerService.RemoveProject(projectId, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "project removed successfully"})
+}
+
+func (ctrl *EngineerController) GetEngineerProjects(c *gin.Context) {
+	userId, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		return
+	}
+
+	projects, err := ctrl.engineerService.GetProjects(userId)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "projects not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": projects})
+}
+
+func (ctrl *EngineerController) GetEngineerSpecialization(c *gin.Context) {
+	userId, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		return
+	}
+
+	specializations, err := ctrl.engineerService.GetSpecializations(userId)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "specializations not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": specializations})
+}
+
+func (ctrl *EngineerController) AddEngineerSpecailization(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	specializationData := models.Specialization{}
+	err = c.ShouldBindJSON(&specializationData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	err = ctrl.engineerService.AddEngineerSpecailization(specializationData.ID, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "specialization added successfully"})
+}
+
+func (ctrl *EngineerController) RemoveEngineerSpecailization(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	specializationIdStr := c.Params.ByName("id")
+	specializationId, err := uuid.Parse(specializationIdStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid specialization id"})
+		return
+	}
+
+	err = ctrl.engineerService.RemoveSpecialization(specializationId, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "specialization removed successfully"})
 }
