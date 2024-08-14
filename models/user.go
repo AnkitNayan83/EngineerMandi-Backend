@@ -9,9 +9,9 @@ import (
 type Role string
 
 const (
-	Admin        Role = "admin"
-	Organization Role = "organization"
-	Engineer     Role = "engineer"
+	Admin    Role = "admin"
+	Client   Role = "client"
+	Engineer Role = "engineer"
 )
 
 type User struct {
@@ -27,18 +27,8 @@ type User struct {
 	State          string    `json:"state"`
 	Country        string    `json:"country"`
 	Role           Role      `gorm:"type:VARCHAR(20);default:client" json:"role"`
-	Ratings        []Rating  `json:"ratings,omitempty"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
-}
-
-type Rating struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	UserID    uuid.UUID `gorm:"type:uuid;not null;index" json:"userId"`
-	Stars     int       `gorm:"not null" json:"stars"`
-	Comment   string    `json:"comment"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type OAuthUser struct {

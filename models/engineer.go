@@ -16,6 +16,16 @@ type EngineerModel struct {
 	Education       []Education          `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"education"`
 	Certifications  []Certification      `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"certifications"`
 	Projects        []Project            `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"projects"`
+	Ratings         []Rating             `gorm:"foreignKey:EngineerID;references:UserId;constraint:OnDelete:CASCADE;" json:"ratings"`
+}
+
+type Rating struct {
+	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	EngineerID uuid.UUID `gorm:"type:uuid;not null;index" json:"engineerId"`
+	Stars      int       `gorm:"not null" json:"stars"`
+	Comment    string    `json:"comment,omitempty"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 type ProficiencyLevelEnum string

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"github.com/google/uuid"
@@ -46,6 +47,11 @@ type EngineerRepository interface {
 	GetEngineerExperiences(engineerId uuid.UUID) ([]models.EngineerExperience, error)
 	UpdateEngineerExperience(engineerExperienceData *models.EngineerExperience, engineerId uuid.UUID) (*models.EngineerExperience, error)
 	RemoveEngineerExperience(id uuid.UUID, userId uuid.UUID) error
+
+	AddRating(rating *models.Rating, userId uuid.UUID) error
+	GetRatingsByEngineerID(engineerId uuid.UUID) ([]models.Rating, error)
+	UpdateRating(rating *models.Rating, userId uuid.UUID) (*models.Rating, error)
+	RemoveRating(id uuid.UUID, userId uuid.UUID) error
 }
 
 type engineerRepository struct {
@@ -99,7 +105,7 @@ func (r *engineerRepository) GetEngineerByID(id uuid.UUID) (*models.EngineerMode
 
 	var engineer models.EngineerModel
 
-	resp := r.DB.Preload("User").Preload("Specializations").Preload("Experiences").Preload("Skills").Preload("Education").Preload("Certifications").Preload("Projects").Where("user_id = ?", id).First(&engineer)
+	resp := r.DB.Preload("User").Where("user_id = ?", id).First(&engineer)
 
 	if resp.Error != nil {
 		return nil, resp.Error
@@ -537,6 +543,53 @@ func (r *engineerRepository) UpdateEngineerExperience(engineerExperienceData *mo
 
 func (r *engineerRepository) RemoveEngineerExperience(id uuid.UUID, userId uuid.UUID) error {
 	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.EngineerExperience{}).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *engineerRepository) AddRating(rating *models.Rating, engineerId uuid.UUID) error {
+	rating.EngineerID = engineerId
+	rating.CreatedAt = time.Now()
+
+	resp := r.DB.Create(&rating)
+
+	if resp.Error != nil {
+		return resp.Error
+	}
+
+	return nil
+}
+
+func (r *engineerRepository) GetRatingsByEngineerID(engineerId uuid.UUID) ([]models.Rating, error) {
+
+	var ratings []models.Rating
+
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&ratings)
+
+	if resp.Error != nil {
+		return nil, resp.Error
+	}
+
+	return ratings, nil
+}
+
+func (r *engineerRepository) UpdateRating(rating *models.Rating, engineerId uuid.UUID) (*models.Rating, error) {
+
+	err := r.DB.Model(&models.Rating{}).Where("id = ? AND engineer_id = ?", rating.ID, engineerId).Updates(&rating).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rating, nil
+}
+
+func (r *engineerRepository) RemoveRating(id uuid.UUID, userId uuid.UUID) error {
+	err := r.DB.Where("id = ? AND engineer_id = ?", id, userId).Delete(&models.Rating{}).Error
 
 	if err != nil {
 		return err

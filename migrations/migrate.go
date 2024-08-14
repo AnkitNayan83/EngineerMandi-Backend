@@ -19,8 +19,8 @@ func main() {
 func Migrate() {
 	err := initializers.DB.AutoMigrate(
 		&models.User{},
-		&models.Rating{},
 		&models.EngineerModel{},
+		&models.Rating{},
 		&models.EngineerSkills{},
 		&models.Skill{},
 		&models.Specialization{},

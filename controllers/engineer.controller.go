@@ -559,3 +559,98 @@ func (ctrl *EngineerController) RemoveEngineerSpecailization(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "specialization removed successfully"})
 }
+
+func (ctrl *EngineerController) AddRating(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	ratingData := models.Rating{}
+	err = c.ShouldBindJSON(&ratingData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	err = ctrl.engineerService.AddRating(userID, ratingData)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "rating added successfully"})
+}
+
+func (ctrl *EngineerController) GetEngineerRating(c *gin.Context) {
+
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	rating, err := ctrl.engineerService.GetRatings(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": rating})
+}
+
+func (ctrl *EngineerController) UpdateRating(c *gin.Context) {
+
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	ratingData := models.Rating{}
+	err = c.ShouldBindJSON(&ratingData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	err = ctrl.engineerService.UpdateRating(ratingData, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "rating updated successfully"})
+}
+
+func (ctrl *EngineerController) RemoveRating(c *gin.Context) {
+
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	ratingIdStr := c.Params.ByName("id")
+	ratingId, err := uuid.Parse(ratingIdStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid rating id"})
+		return
+	}
+
+	err = ctrl.engineerService.RemoveRating(ratingId, userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "rating removed successfully"})
+}
