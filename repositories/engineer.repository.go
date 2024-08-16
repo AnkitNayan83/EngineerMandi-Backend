@@ -49,9 +49,10 @@ type EngineerRepository interface {
 	RemoveEngineerExperience(id uuid.UUID, userId uuid.UUID) error
 
 	AddRating(rating *models.Rating, userId uuid.UUID) error
-	GetRatingsByEngineerID(engineerId uuid.UUID) ([]models.Rating, error)
+	GetRatingsByEngineerID(engineerId uuid.UUID, page int) ([]models.Rating, error)
 	UpdateRating(rating *models.Rating, userId uuid.UUID) (*models.Rating, error)
 	RemoveRating(id uuid.UUID, userId uuid.UUID) error
+	GetRatingsAverage(engineerId uuid.UUID) (float64, error)
 }
 
 type engineerRepository struct {
@@ -564,11 +565,11 @@ func (r *engineerRepository) AddRating(rating *models.Rating, engineerId uuid.UU
 	return nil
 }
 
-func (r *engineerRepository) GetRatingsByEngineerID(engineerId uuid.UUID) ([]models.Rating, error) {
+func (r *engineerRepository) GetRatingsByEngineerID(engineerId uuid.UUID, page int) ([]models.Rating, error) {
 
 	var ratings []models.Rating
 
-	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&ratings)
+	resp := r.DB.Where("engineer_id = ?", engineerId).Find(&ratings).Limit(10).Offset((page - 1) * 10)
 
 	if resp.Error != nil {
 		return nil, resp.Error
@@ -596,4 +597,26 @@ func (r *engineerRepository) RemoveRating(id uuid.UUID, userId uuid.UUID) error 
 	}
 
 	return nil
+}
+
+func (r *engineerRepository) GetRatingsAverage(engineerId uuid.UUID) (float64, error) {
+	var result struct {
+		totalRating float64
+		count       int
+	}
+
+	resp := r.DB.Model(&models.Rating{}).
+		Where("engineer_id = ?", engineerId).
+		Select("SUM(stars) as totalRating, COUNT(*) as count").
+		Scan(&result)
+
+	if resp.Error != nil {
+		return 0, resp.Error
+	}
+
+	if result.count == 0 {
+		return 0, nil
+	}
+
+	return result.totalRating / float64(result.count), nil
 }

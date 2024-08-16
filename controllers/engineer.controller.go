@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"github.com/AnkitNayan83/EngineerMandi-Backend/services"
@@ -593,7 +594,20 @@ func (ctrl *EngineerController) GetEngineerRating(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
-	rating, err := ctrl.engineerService.GetRatings(userID)
+
+	var page int
+	pageStr := c.Query("page")
+
+	if pageStr == "" {
+		page = 1
+	} else {
+		page, err = strconv.Atoi(pageStr)
+		if err != nil {
+			page = 1
+		}
+	}
+
+	rating, err := ctrl.engineerService.GetRatings(userID, page)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -653,4 +667,21 @@ func (ctrl *EngineerController) RemoveRating(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "rating removed successfully"})
+}
+
+func (ctrl *EngineerController) GetRatingsAverage(c *gin.Context) {
+	userID, err := utils.GetUserFromRequest(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	average, err := ctrl.engineerService.GetRatingsAverage(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": average})
 }

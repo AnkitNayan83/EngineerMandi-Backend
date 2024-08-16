@@ -45,9 +45,10 @@ type EngineerService interface {
 	RemoveEngineerExperience(id uuid.UUID, userId uuid.UUID) error
 
 	AddRating(engineerId uuid.UUID, rating models.Rating) error
-	GetRatings(engineerId uuid.UUID) ([]models.Rating, error)
+	GetRatings(engineerId uuid.UUID, page int) ([]models.Rating, error)
 	UpdateRating(rating models.Rating, engineerId uuid.UUID) error
 	RemoveRating(id uuid.UUID, userId uuid.UUID) error
+	GetRatingsAverage(engineerId uuid.UUID) (float64, error)
 }
 
 type engineerService struct {
@@ -508,8 +509,8 @@ func (s *engineerService) AddRating(engineerId uuid.UUID, rating models.Rating) 
 	return nil
 }
 
-func (s *engineerService) GetRatings(engineerId uuid.UUID) ([]models.Rating, error) {
-	ratings, err := s.repo.GetRatingsByEngineerID(engineerId)
+func (s *engineerService) GetRatings(engineerId uuid.UUID, page int) ([]models.Rating, error) {
+	ratings, err := s.repo.GetRatingsByEngineerID(engineerId, page)
 
 	if err != nil {
 		return nil, err
@@ -536,4 +537,15 @@ func (s *engineerService) RemoveRating(ratingId uuid.UUID, engineerId uuid.UUID)
 	}
 
 	return nil
+}
+
+func (s *engineerService) GetRatingsAverage(engineerId uuid.UUID) (float64, error) {
+
+	average, err := s.repo.GetRatingsAverage(engineerId)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return average, nil
 }
