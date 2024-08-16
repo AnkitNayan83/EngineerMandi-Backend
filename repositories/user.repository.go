@@ -10,6 +10,7 @@ type UserRepository interface {
 	FindUserByEmail(email string) (*models.User, error)
 	FindUserById(id string) (*models.User, error)
 	UpdateUserById(id string, user *models.User) error
+	CreateEngineer(engineer models.EngineerModel) error
 }
 
 type userRepository struct {
@@ -59,6 +60,14 @@ func (r *userRepository) UpdateUserById(id string, user *models.User) error {
 	err := r.DB.Model(&models.User{}).Where("id = ?", id).Updates(&user).Error
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *userRepository) CreateEngineer(engineer models.EngineerModel) error {
+	resp := r.DB.Create(&engineer)
+	if resp.Error != nil {
+		return resp.Error
 	}
 	return nil
 }

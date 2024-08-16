@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -71,8 +70,6 @@ func (s *authService) FetchUserInfo(token *oauth2.Token) (*models.OAuthUser, err
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Print(string(body))
 
 	err = json.Unmarshal(body, &user)
 

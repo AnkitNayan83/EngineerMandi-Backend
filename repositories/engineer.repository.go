@@ -10,7 +10,6 @@ import (
 )
 
 type EngineerRepository interface {
-	CreateEngineer(engineerData *models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error)
 	UpdateEngineer(engineerData *models.EngineerModel) (*models.EngineerModel, error)
 	GetEngineerByID(id uuid.UUID) (*models.EngineerModel, error)
 	UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error
@@ -61,23 +60,6 @@ type engineerRepository struct {
 
 func NewEngineerRepository(db *gorm.DB) EngineerRepository {
 	return &engineerRepository{DB: db}
-}
-
-func (r *engineerRepository) CreateEngineer(engineerData *models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error) {
-
-	engineer := models.EngineerModel{
-		UserId:          userId,
-		Resume:          engineerData.Resume,
-		Specializations: engineerData.Specializations,
-	}
-
-	resp := r.DB.Create(&engineer)
-
-	if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return &engineer, nil
 }
 
 func (r *engineerRepository) UpdateEngineer(engineerData *models.EngineerModel) (*models.EngineerModel, error) {

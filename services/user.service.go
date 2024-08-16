@@ -53,6 +53,18 @@ func (s *userService) ProfileSetup(userId string, updatedUser *models.User) (*mo
 	if updatedUser.Country != "" {
 		currentUser.Country = updatedUser.Country
 	}
+	if updatedUser.Role != "" {
+		currentUser.Role = updatedUser.Role
+		// create engineer if the role is engineer
+		if updatedUser.Role == "engineer" {
+			engineer := models.EngineerModel{
+				UserId: currentUser.ID,
+			}
+			if err := s.userRepository.CreateEngineer(engineer); err != nil {
+				return nil, err
+			}
+		}
+	}
 
 	if err := s.userRepository.UpdateUserById(userId, currentUser); err != nil {
 		return nil, err

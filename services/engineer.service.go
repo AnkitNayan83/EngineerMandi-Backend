@@ -10,7 +10,6 @@ import (
 )
 
 type EngineerService interface {
-	CreateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error)
 	GetEngineerByID(userId uuid.UUID) (*models.EngineerModel, error)
 	UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error
 
@@ -78,21 +77,6 @@ func (s *engineerService) UpdateEngineerResume(resumeUrl string, userId uuid.UUI
 	}
 
 	return nil
-}
-
-func (s *engineerService) CreateEngineer(engineerData models.EngineerModel, userId uuid.UUID) (*models.EngineerModel, error) {
-
-	if engineerData.Resume == "" {
-		return nil, errors.New("engineer resume is required")
-	}
-
-	newEngineer, err := s.repo.CreateEngineer(&engineerData, userId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return newEngineer, nil
 }
 
 func (s *engineerService) GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error) {
