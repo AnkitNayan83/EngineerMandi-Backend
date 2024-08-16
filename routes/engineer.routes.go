@@ -51,6 +51,6 @@ func EngineerRoutes(router *gin.RouterGroup, engineerController *controllers.Eng
 	router.GET(fmt.Sprint(pathPrefix+"/rating"), engineerController.GetEngineerRating)
 	router.GET(fmt.Sprint(pathPrefix+"/rating/average"), engineerController.GetRatingsAverage)
 	router.PATCH(fmt.Sprint(pathPrefix+"/rating"), engineerController.UpdateRating)
-	router.DELETE(fmt.Sprint(pathPrefix+"/rating"), engineerController.RemoveRating)
+	router.DELETE(fmt.Sprint(pathPrefix+"/rating/:id"), engineerController.RemoveRating)
 
 }
