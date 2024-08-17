@@ -20,6 +20,27 @@ func NewEngineerController(engineerService services.EngineerService) *EngineerCo
 	return &EngineerController{engineerService: engineerService}
 }
 
+func (ctrl *EngineerController) GetEngineers(c *gin.Context) {
+	var filterRequest struct {
+		SpecializationIds []uuid.UUID `json:"specializationIds"`
+		SkillIds          []uuid.UUID `json:"skillIds"`
+	}
+
+	if err := c.ShouldBindJSON(&filterRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	engineers, err := ctrl.engineerService.GetEngineers(filterRequest.SpecializationIds, filterRequest.SkillIds)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": engineers})
+}
+
 func (ctrl *EngineerController) GetEngineer(c *gin.Context) {
 	userID, err := utils.GetUserFromRequest(c)
 

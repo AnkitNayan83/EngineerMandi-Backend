@@ -12,6 +12,7 @@ import (
 type EngineerService interface {
 	GetEngineerByID(userId uuid.UUID) (*models.EngineerModel, error)
 	UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error
+	GetEngineers(specializationIDs []uuid.UUID, skillIds []uuid.UUID) ([]models.EngineerModel, error)
 
 	CreateEngineerSkill(engineerSkillData models.EngineerSkills, userId uuid.UUID) (*models.EngineerSkills, error)
 	GetEngineerSkills(engineerId uuid.UUID) ([]models.EngineerSkills, error)
@@ -56,6 +57,16 @@ type engineerService struct {
 
 func NewEngineerService(repo repositories.EngineerRepository) EngineerService {
 	return &engineerService{repo: repo}
+}
+
+func (s *engineerService) GetEngineers(specializationIDs []uuid.UUID, skillIds []uuid.UUID) ([]models.EngineerModel, error) {
+	engineers, err := s.repo.GetEngineers(specializationIDs, skillIds)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return engineers, nil
 }
 
 func (s *engineerService) GetEngineerByID(userId uuid.UUID) (*models.EngineerModel, error) {

@@ -10,6 +10,7 @@ import (
 )
 
 type EngineerRepository interface {
+	GetEngineers(specializationIds []uuid.UUID, skillIds []uuid.UUID) ([]models.EngineerModel, error)
 	UpdateEngineer(engineerData *models.EngineerModel) (*models.EngineerModel, error)
 	GetEngineerByID(id uuid.UUID) (*models.EngineerModel, error)
 	UpdateEngineerResume(resumeUrl string, userId uuid.UUID) error
@@ -60,6 +61,30 @@ type engineerRepository struct {
 
 func NewEngineerRepository(db *gorm.DB) EngineerRepository {
 	return &engineerRepository{DB: db}
+}
+
+func (r *engineerRepository) GetEngineers(specializationIds []uuid.UUID, skillIds []uuid.UUID) ([]models.EngineerModel, error) {
+	var engineers []models.EngineerModel
+
+	query := r.DB.Model(&models.EngineerModel{})
+
+	if len(specializationIds) > 0 {
+		query = query.Joins("JOIN engineer_specializations ON engineer_specializations.engineer_model_user_id = engineer_models.user_id").
+			Where("engineer_specializations.specialization_id IN ?", specializationIds)
+	}
+
+	if len(skillIds) > 0 {
+		query = query.Joins("JOIN engineer_skills ON engineer_skills.engineer_id = engineer_models.user_id").
+			Where("engineer_skills.skill_id IN ?", skillIds)
+	}
+
+	resp := query.Distinct("engineer_models.user_id").Find(&engineers)
+
+	if resp.Error != nil {
+		return nil, resp.Error
+	}
+
+	return engineers, nil
 }
 
 func (r *engineerRepository) UpdateEngineer(engineerData *models.EngineerModel) (*models.EngineerModel, error) {
