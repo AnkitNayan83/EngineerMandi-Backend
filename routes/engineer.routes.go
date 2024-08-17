@@ -9,7 +9,7 @@ import (
 
 func EngineerRoutes(router *gin.RouterGroup, engineerController *controllers.EngineerController) {
 
-	pathPrefix := "/engineer"
+	const pathPrefix = "/engineer"
 
 	// Engineer Routes
 	router.GET(fmt.Sprint(pathPrefix), engineerController.GetEngineer)

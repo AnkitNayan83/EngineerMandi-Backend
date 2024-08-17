@@ -77,3 +77,22 @@ func (ctrl *UserController) GetUserInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, userInfo)
 
 }
+
+func (ctrl *UserController) CreateEngineer(c *gin.Context) {
+
+	var engineer models.EngineerModel
+
+	if err := c.ShouldBindJSON(&engineer); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := ctrl.userService.CreateEngineer(engineer)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Engineer created successfully"})
+}

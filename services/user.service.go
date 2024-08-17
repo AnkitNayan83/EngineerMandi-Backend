@@ -8,6 +8,7 @@ import (
 type UserService interface {
 	ProfileSetup(userId string, user *models.User) (*models.User, error)
 	GetUserInfo(userId string) (*models.User, error)
+	CreateEngineer(engineer models.EngineerModel) error
 }
 
 type userService struct {
@@ -60,7 +61,9 @@ func (s *userService) ProfileSetup(userId string, updatedUser *models.User) (*mo
 			engineer := models.EngineerModel{
 				UserId: currentUser.ID,
 			}
-			if err := s.userRepository.CreateEngineer(engineer); err != nil {
+			err := s.CreateEngineer(engineer)
+
+			if err != nil {
 				return nil, err
 			}
 		}
@@ -76,4 +79,8 @@ func (s *userService) ProfileSetup(userId string, updatedUser *models.User) (*mo
 
 func (s *userService) GetUserInfo(userId string) (*models.User, error) {
 	return s.userRepository.FindUserById(userId)
+}
+
+func (s *userService) CreateEngineer(engineer models.EngineerModel) error {
+	return s.userRepository.CreateEngineer(engineer)
 }
