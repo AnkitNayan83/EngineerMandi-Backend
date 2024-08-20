@@ -153,6 +153,7 @@ func (s *engineerService) GetEducations(engineerId uuid.UUID) ([]models.Educatio
 }
 
 func (s *engineerService) CreateEducation(educationData models.Education, userId uuid.UUID) (*models.Education, error) {
+
 	if educationData.Degree == "" {
 		return nil, errors.New("education degree is required")
 	}
@@ -183,27 +184,31 @@ func (s *engineerService) CreateEducation(educationData models.Education, userId
 }
 
 func (s *engineerService) UpdateEducation(educationData models.Education, userId uuid.UUID) (*models.Education, error) {
+	currEducation, err := s.repo.GetEducationById(educationData.ID, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	if educationData.Degree == "" {
-		return nil, errors.New("education degree is required")
+		educationData.Degree = currEducation.Degree
 	}
 
 	if educationData.Institute == "" {
-		return nil, errors.New("education institute is required")
+		educationData.Institute = currEducation.Institute
 	}
 
 	if educationData.Branch == "" {
-		return nil, errors.New("education branch is required")
+		educationData.Branch = currEducation.Branch
 	}
 
 	if educationData.YearOfPassing == 0 {
-		return nil, errors.New("education year of passing is required")
+		educationData.YearOfPassing = currEducation.YearOfPassing
 	}
 
 	if educationData.CGPA == 0 {
-		return nil, errors.New("education cgpa is required")
+		educationData.CGPA = currEducation.CGPA
 	}
-
-	log.Print(educationData)
 
 	education, err := s.repo.UpdateEducation(&educationData, userId)
 
@@ -261,16 +266,23 @@ func (s *engineerService) CreateCertification(certificationData models.Certifica
 }
 
 func (s *engineerService) UpdateCertification(certificationData models.Certification, userId uuid.UUID) (*models.Certification, error) {
+
+	currCertification, err := s.repo.GetCertificationById(certificationData.ID, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	if certificationData.Name == "" {
-		return nil, errors.New("certification name is required")
+		certificationData.Name = currCertification.Name
 	}
 
 	if certificationData.CertificateUrl == "" {
-		return nil, errors.New("certification certificate url is required")
+		certificationData.CertificateUrl = currCertification.CertificateUrl
 	}
 
 	if certificationData.IssuedDate.IsZero() {
-		return nil, errors.New("certification issued date is required")
+		certificationData.IssuedDate = currCertification.IssuedDate
 	}
 
 	certificate, err := s.repo.UpdateCertification(&certificationData, userId)
@@ -432,20 +444,27 @@ func (s *engineerService) CreateEngineerExperience(experienceData models.Enginee
 }
 
 func (s *engineerService) UpdateEngineerExperience(experienceData models.EngineerExperience, userId uuid.UUID) (*models.EngineerExperience, error) {
+
+	currEngineerExperience, err := s.repo.GetEngineerExperienceById(experienceData.ID, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	if experienceData.Company == "" {
-		return nil, errors.New("experience company is required")
+		experienceData.Company = currEngineerExperience.Company
 	}
 
 	if experienceData.Location == "" {
-		return nil, errors.New("experience location is required")
+		experienceData.Location = currEngineerExperience.Location
 	}
 
 	if experienceData.Role == "" {
-		return nil, errors.New("experience role is required")
+		experienceData.Role = currEngineerExperience.Role
 	}
 
 	if experienceData.StartDate.IsZero() {
-		return nil, errors.New("experience start date is required")
+		experienceData.StartDate = currEngineerExperience.StartDate
 	}
 
 	if !experienceData.IsCurrent {
