@@ -78,7 +78,7 @@ func (r *engineerRepository) GetEngineers(specializationIds []uuid.UUID, skillId
 			Where("engineer_skills.skill_id IN ?", skillIds)
 	}
 
-	resp := query.Distinct("engineer_models.user_id").Find(&engineers)
+	resp := query.Preload("User").Find(&engineers)
 
 	if resp.Error != nil {
 		return nil, resp.Error

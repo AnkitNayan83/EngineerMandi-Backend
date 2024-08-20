@@ -26,10 +26,7 @@ func (ctrl *EngineerController) GetEngineers(c *gin.Context) {
 		SkillIds          []uuid.UUID `json:"skillIds"`
 	}
 
-	if err := c.ShouldBindJSON(&filterRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	_ = c.ShouldBindJSON(&filterRequest)
 
 	engineers, err := ctrl.engineerService.GetEngineers(filterRequest.SpecializationIds, filterRequest.SkillIds)
 

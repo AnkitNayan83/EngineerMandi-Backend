@@ -12,6 +12,7 @@ func EngineerRoutes(router *gin.RouterGroup, engineerController *controllers.Eng
 	const pathPrefix = "/engineer"
 
 	// Engineer Routes
+	router.GET(fmt.Sprint(pathPrefix+"/all"), engineerController.GetEngineers)
 	router.GET(fmt.Sprint(pathPrefix), engineerController.GetEngineer)
 	router.PATCH(fmt.Sprint(pathPrefix+"/resume"), engineerController.UpdateEngineerResume)
 
