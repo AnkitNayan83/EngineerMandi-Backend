@@ -37,7 +37,7 @@ jobs:
               run: go test -v ./...
 
             - name: Build the application
-              run: go build -v -o ./bin/engineermandi-backend ./cmd/main.go
+              run: go build -v -o ./bin/engineermandi-backend ./main.go
 
             - name: Archive production artifacts
               uses: actions/upload-artifact@v3
