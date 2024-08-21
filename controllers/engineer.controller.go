@@ -91,28 +91,24 @@ func (ctrl *EngineerController) UpdateOrAddEngineerExperience(c *gin.Context) {
 		return
 	}
 
-	engineerExperienceData := []models.EngineerExperience{}
+	engineerExperienceData := models.EngineerExperience{}
 	err = c.ShouldBindJSON(&engineerExperienceData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "empty data in the request"})
 		return
 	}
-
-	for _, exp := range engineerExperienceData {
-		if exp.ID == uuid.Nil {
-			_, err := ctrl.engineerService.CreateEngineerExperience(exp, userID)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-		} else {
-			log.Println(exp)
-			_, err := ctrl.engineerService.UpdateEngineerExperience(exp, userID)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
+	if engineerExperienceData.ID == uuid.Nil {
+		_, err := ctrl.engineerService.CreateEngineerExperience(engineerExperienceData, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		_, err := ctrl.engineerService.UpdateEngineerExperience(engineerExperienceData, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 	}
 

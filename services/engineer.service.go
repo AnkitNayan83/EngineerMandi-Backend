@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"log"
 
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
 	"github.com/AnkitNayan83/EngineerMandi-Backend/repositories"
@@ -445,7 +444,7 @@ func (s *engineerService) CreateEngineerExperience(experienceData models.Enginee
 
 func (s *engineerService) UpdateEngineerExperience(experienceData models.EngineerExperience, userId uuid.UUID) (*models.EngineerExperience, error) {
 
-	currEngineerExperience, err := s.repo.GetEngineerExperienceById(experienceData.ID, userId)
+	currEngineerExperience, err := s.repo.GetEngineerExperienceById(userId, experienceData.ID)
 
 	if err != nil {
 		return nil, err
@@ -477,8 +476,6 @@ func (s *engineerService) UpdateEngineerExperience(experienceData models.Enginee
 		}
 
 	}
-
-	log.Println(experienceData.Description)
 
 	experience, err := s.repo.UpdateEngineerExperience(&experienceData, userId)
 
