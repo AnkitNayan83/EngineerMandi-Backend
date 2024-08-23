@@ -126,5 +126,5 @@ jobs:
                       docker pull ${DOCKER_IMAGE}
 
                       # run the new container
-                      docker run -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                      sudo docker run -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
