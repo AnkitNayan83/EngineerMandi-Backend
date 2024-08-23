@@ -119,7 +119,7 @@ jobs:
                       fi
 
                       # ensure docker daemon is running
-                      sudo systemctl restart docker
+                      sudo systemctl start docker
 
                       # add user to docker group to avoid permissin issues
                       sudo usermod -aG docker ${EC2_USER}
@@ -129,7 +129,7 @@ jobs:
                       docker rm engineermandi-backend || true
 
                       # pull the latest image
-                      docker pull $DOCKER_IMAGE
+                      sudo docker pull $DOCKER_IMAGE
 
                       # run the new container
                       sudo docker run -d -p 80:80 --name engineermandi-backend $DOCKER_IMAGE
