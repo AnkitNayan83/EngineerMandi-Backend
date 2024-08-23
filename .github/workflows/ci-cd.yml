@@ -99,7 +99,7 @@ jobs:
                   mkdir -p ~/.ssh
 
                   # save private key to ec2_key.pem
-                  echo "$EC2_SSH_KEY" > ec2_key.pem
+                  echo "${EC2_SSH_KEY}" | tr -d '\r' > ~/.ssh/ec2_key.pem
                   chmod 400 ec2_key.pem
 
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
