@@ -92,6 +92,7 @@ jobs:
                   EC2_USER: ${{ secrets.EC2_USER }}
                   EC2_SSH_KEY: ${{ secrets.EC2_KEY }}
                   DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
+                  GHCR_PAT: ${{ secrets.GHCR_PAT }}
               run: |
                   echo "Deploying to production..."
 
@@ -125,6 +126,9 @@ jobs:
 
                       # Ensure docker daemon is running
                       sudo systemctl start docker
+
+                      # Login to Github Container Registry
+                      echo "${GHCR_PAT}" | sudo docker login ghcr.io -u ${EC2_USER} --password-stdin
 
                       # Stop the old container if it exists
                       sudo docker stop engineermandi-backend || echo "Container not running, skipping stop."
