@@ -129,10 +129,6 @@ jobs:
                       sudo usermod -aG docker ${EC2_USER}
                       newgrp docker
 
-                      # create docker config directory
-                      sudo mkdir -p ~/.docker
-                      echo '{"auths":{"ghcr.io":{"auth":"'$(echo -n "ankitnayan83:$GITHUB_TOKEN" | base64)'"}}}' > ~/.docker/config.json
-
                       # stop the old container if it exists
                       docker stop engineermandi-backend || true
                       docker rm engineermandi-backend || true
