@@ -81,6 +81,33 @@ jobs:
         needs: docker
 
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
             - name: Deploy to production
+              env:
+                  EC2_HOST: ${{ secrets.EC2_HOST}}
+                  EC2_USER: ${{ secrets.EC2_USER }}
+                  EC2_SSH_KEY: ${{ secrets.EC2_KEY }}
+                  DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
               run: |
                   echo "Deploying to production..."
+
+                  sudo apt-get update
+                  sudo apt-get install -y awscli
+
+                  # save private key to ec2_key.pem
+                  echo "$EC2_SSH_KEY" > ec2_key.pem
+                  chmod 600 ec2_key.pem
+
+                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
+                      # stop the old container if it exists
+                      docker stop engineermandi-backend || true
+                      docker rm engineermandi-backend || true
+
+                      # pull the latest image
+                      docker pull ${DOCKER_IMAGE}
+
+                      # run the new container
+                      docker run -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                  EOF
