@@ -7,6 +7,7 @@ on:
     pull_request:
         branches:
             - main # Run the pipeline on pull requests to the main branch
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -44,6 +45,7 @@ jobs:
               with:
                   name: go-binaries
                   path: ./bin/engineermandi-backend
+
     docker:
         runs-on: ubuntu-latest
         needs: build
@@ -98,21 +100,21 @@ jobs:
 
                   mkdir -p ~/.ssh
 
-                  # save private key to ec2_key.pem
+                  # Save private key to ec2_key.pem
                   echo "$EC2_SSH_KEY" > ec2_key.pem
                   chmod 600 ec2_key.pem
 
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
+                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
 
                       set -e
-                      export DOCKER_IMAGE="${DOCKER_IMAGE}"
+                      DOCKER_IMAGE="${DOCKER_IMAGE}"
 
-                      # update package index
+                      # Update package index
                       sudo yum update -y
 
-                      # install docker if not already installed
+                      # Install docker if not already installed
                       if ! command -v docker &> /dev/null
                       then
                           echo "Docker not found. Installing Docker..."
@@ -121,16 +123,16 @@ jobs:
                           sudo systemctl enable docker
                       fi
 
-                      # ensure docker daemon is running
+                      # Ensure docker daemon is running
                       sudo systemctl start docker
 
-                      # stop the old container if it exists
-                      sudo docker stop engineermandi-backend || true
-                      sudo docker rm engineermandi-backend || true
+                      # Stop the old container if it exists
+                      sudo docker stop engineermandi-backend || echo "Container not running, skipping stop."
+                      sudo docker rm engineermandi-backend || echo "Container not found, skipping remove."
 
-                      # pull the latest image
-                      sudo docker pull ghcr.io/ankitnayan83/engineermandi-backend:latest
+                      # Pull the latest image
+                      sudo docker pull ${DOCKER_IMAGE}
 
-                      # run the new container
-                      sudo docker run -d -p 80:80 --name engineermandi-backend ghcr.io/ankitnayan83/engineermandi-backend:latest
+                      # Run the new container
+                      sudo docker run -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
