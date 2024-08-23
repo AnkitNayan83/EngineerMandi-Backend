@@ -98,7 +98,7 @@ jobs:
 
                   # save private key to ec2_key.pem
                   echo "$EC2_SSH_KEY" > ec2_key.pem
-                  chmod 600 ec2_key.pem
+                  chmod 400 ec2_key.pem
 
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
                       # stop the old container if it exists
