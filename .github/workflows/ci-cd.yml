@@ -90,6 +90,7 @@ jobs:
                   EC2_USER: ${{ secrets.EC2_USER }}
                   EC2_SSH_KEY: ${{ secrets.EC2_KEY }}
                   DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   echo "Deploying to production..."
 
@@ -105,6 +106,9 @@ jobs:
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
+
+                      export DOCKER_IMAGE=${DOCKER_IMAGE}
+                      export GITHUB_TOKEN=${GITHUB_TOKEN}
 
                       # update package index
                       sudo yum update -y
@@ -123,6 +127,9 @@ jobs:
 
                       # add user to docker group to avoid permissin issues
                       sudo usermod -aG docker ${EC2_USER}
+
+                      # login to Github Container Registry
+                      echo $GITHUB_TOKEN | docker login ghcr.io -u ankitnayan83 --password-stdin
 
                       # stop the old container if it exists
                       docker stop engineermandi-backend || true
