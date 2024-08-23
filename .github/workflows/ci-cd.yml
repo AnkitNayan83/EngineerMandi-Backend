@@ -125,9 +125,6 @@ jobs:
                       # ensure docker daemon is running
                       sudo systemctl start docker
 
-                      # add user to docker group to avoid permissin issues
-                      sudo usermod -aG docker ${EC2_USER}
-
                       # stop the old container if it exists
                       docker stop engineermandi-backend || true
                       docker rm engineermandi-backend || true
