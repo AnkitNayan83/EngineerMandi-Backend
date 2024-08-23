@@ -118,13 +118,19 @@ jobs:
                           sudo systemctl enable docker
                       fi
 
+                      # ensure docker daemon is running
+                      sudo systemctl restart docker
+
+                      # add user to docker group to avoid permissin issues
+                      sudo usermod -aG docker ${EC2_USER}
+
                       # stop the old container if it exists
                       docker stop engineermandi-backend || true
                       docker rm engineermandi-backend || true
 
                       # pull the latest image
-                      docker pull ${DOCKER_IMAGE}
+                      docker pull $DOCKER_IMAGE
 
                       # run the new container
-                      sudo docker run -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                      sudo docker run -d -p 80:80 --name engineermandi-backend $DOCKER_IMAGE
                   EOF
