@@ -126,8 +126,8 @@ jobs:
                       sudo systemctl start docker
 
                       # stop the old container if it exists
-                      docker stop engineermandi-backend || true
-                      docker rm engineermandi-backend || true
+                      sudo docker stop engineermandi-backend || true
+                      sudo docker rm engineermandi-backend || true
 
                       # pull the latest image
                       sudo docker pull $DOCKER_IMAGE
