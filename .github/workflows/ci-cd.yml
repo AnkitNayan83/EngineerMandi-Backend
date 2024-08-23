@@ -127,7 +127,6 @@ jobs:
 
                       # add user to docker group to avoid permissin issues
                       sudo usermod -aG docker ${EC2_USER}
-                      newgrp docker
 
                       # stop the old container if it exists
                       docker stop engineermandi-backend || true
