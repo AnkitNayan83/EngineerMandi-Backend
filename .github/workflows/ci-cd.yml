@@ -107,7 +107,7 @@ jobs:
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
 
                       # update package index
-                      sudo apt-get update
+                      sudo yum update -y
 
                       # install docker if not already installed
                       if ! command -v docker &> /dev/null
