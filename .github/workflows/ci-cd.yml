@@ -129,8 +129,8 @@ jobs:
                       sudo docker rm engineermandi-backend || true
 
                       # pull the latest image
-                      sudo docker pull $DOCKER_IMAGE
+                      sudo docker pull ghcr.io/ankitnayan83/engineermandi-backend:latest
 
                       # run the new container
-                      sudo docker run -d -p 80:80 --name engineermandi-backend $DOCKER_IMAGE
+                      sudo docker run -d -p 80:80 --name engineermandi-backend ghcr.io/ankitnayan83/engineermandi-backend:latest
                   EOF
