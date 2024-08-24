@@ -152,5 +152,5 @@ jobs:
                       sudo docker pull ${DOCKER_IMAGE}
 
                       # Run the new container with .env file
-                      sudo docker run --env-file /home/${EC2_USER}/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                      sudo docker run --env-file /home/${USER}/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
