@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
     push:
         branches:
-            - main # Run the pipeline on pushes to the main branch
+            - main
     pull_request:
         branches:
-            - main # Run the pipeline on pull requests to the main branch
+            - main
 
 jobs:
     build:
@@ -88,11 +88,16 @@ jobs:
 
             - name: Deploy to production
               env:
-                  EC2_HOST: ${{ secrets.EC2_HOST}}
+                  EC2_HOST: ${{ secrets.EC2_HOST }}
                   EC2_USER: ${{ secrets.EC2_USER }}
                   EC2_SSH_KEY: ${{ secrets.EC2_KEY }}
-                  DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
+                  DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
                   GHCR_PAT: ${{ secrets.GHCR_PAT }}
+                  JWT_KEY: ${{ secrets.JWT_KEY }}
+                  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+                  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+                  PORT: ${{ secrets.PORT }}
+                  DB_URL: ${{ secrets.DB_URL }}
               run: |
                   echo "Deploying to production..."
 
@@ -105,9 +110,18 @@ jobs:
                   echo "$EC2_SSH_KEY" > ec2_key.pem
                   chmod 600 ec2_key.pem
 
+                  # Add the EC2 host key to known_hosts to avoid verification failures
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-                  scp -i ec2_key.pem .env ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/.env
+                  # Create the .env file on the EC2 instance using secrets
+                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
+                      echo "JWT_KEY=${JWT_KEY}" > .env
+                      echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> .env
+                      echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> .env
+                      echo "PORT=${PORT}" >> .env
+                      echo "DB_URL=${DB_URL}" >> .env
+                      exit
+                  EOF
 
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
 
@@ -139,6 +153,6 @@ jobs:
                       # Pull the latest image
                       sudo docker pull ${DOCKER_IMAGE}
 
-                      # Run the new container
+                      # Run the new container with .env file
                       sudo docker run --env-file /home/${EC2_USER}/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
