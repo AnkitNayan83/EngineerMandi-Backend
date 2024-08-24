@@ -115,18 +115,16 @@ jobs:
 
                   # Create the .env file on the EC2 instance using secrets
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
-                      echo "JWT_KEY=${JWT_KEY}" > .env
-                      echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> .env
-                      echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> .env
-                      echo "PORT=${PORT}" >> .env
-                      echo "DB_URL=${DB_URL}" >> .env
-                      exit
-                  EOF
 
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
 
                       set -e
-                      DOCKER_IMAGE="${DOCKER_IMAGE}"
+                      echo "JWT_KEY=${JWT_KEY}" > /home/${USER}/.env
+                      echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> /home/${USER}/.env
+                      echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> /home/${USER}/.env
+                      echo "PORT=${PORT}" >> /home/${USER}/.env
+                      echo "DB_URL=${DB_URL}" >> /home/${USER}/.env
+
 
                       # Update package index
                       sudo yum update -y
