@@ -105,6 +105,8 @@ jobs:
                   echo "$EC2_SSH_KEY" > ec2_key.pem
                   chmod 600 ec2_key.pem
 
+                  scp -i ec2_key.pem .env ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/.env
+
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
@@ -138,5 +140,5 @@ jobs:
                       sudo docker pull ${DOCKER_IMAGE}
 
                       # Run the new container
-                      sudo docker run -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                      sudo docker run --env-file /home/${EC2_USER}/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
