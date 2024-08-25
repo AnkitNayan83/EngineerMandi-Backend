@@ -113,10 +113,7 @@ jobs:
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
                   # Connect to EC2 and execute deployment commands
-                  ssh -i ~/.ssh/ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
-                    # Create .env file on EC2
-                    printf "GOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\nJWT_KEY=%s\nPORT=%s\nDB_URL=%s\n" \
-                      "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" "$JWT_KEY" "$PORT" "$DB_URL" > .env
+                  ssh -i ~/.ssh/ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
 
                     # Update the package index and install Docker if not present
                     sudo yum update -y
