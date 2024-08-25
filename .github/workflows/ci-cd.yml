@@ -114,24 +114,12 @@ jobs:
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
-                      set -e
-                      export DOCKER_IMAGE="${DOCKER_IMAGE}"
-                      export GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID}"
-                      export PORT="${PORT}"
-                      export DB_URL="${DB_URL}"
-                      export GHCR_PAT="${GHCR_PAT}"
-                      export EC2_USER="${EC2_USER}"
-                      export EC2_HOST="${EC2_HOST}"
-                      export GOOGLE_CLIENT_SECRET = "${GOOGLE_CLIENT_SECRET}"
-                      export JWT_KEY = "${JWT_KEY}"
 
                       # Create .env file
                       cat <<EOT > .env
                       GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
                       GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-
                       JWT_KEY=${JWT_KEY}
-                      
                       PORT=${PORT}
                       DB_URL=${DB_URL}
                       EOT
