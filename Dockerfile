@@ -19,6 +19,9 @@ RUN go build -o main .
 # Start a new stage from scratch
 FROM alpine:latest
 
+# Coppy environment variables
+COPY .env .env
+
 # Set the current working directory inside the container
 WORKDIR /app
 
