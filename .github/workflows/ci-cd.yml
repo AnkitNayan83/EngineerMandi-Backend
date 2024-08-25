@@ -113,8 +113,7 @@ jobs:
 
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
-
+                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
                       # Create .env file
                       cat <<EOT > .env
                       GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
