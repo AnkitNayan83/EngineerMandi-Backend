@@ -113,41 +113,41 @@ jobs:
 
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
-                      # Create .env file
-                      cat <<EOT > .env
+                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} <<EOF
+                    # Create .env file
+                    cat <<EOT > .env
                       GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
                       GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
                       JWT_KEY=${JWT_KEY}
                       PORT=${PORT}
                       DB_URL=${DB_URL}
-                      EOT
+                    EOT
 
-                      # Update package index
-                      sudo yum update -y
+                    # Update package index
+                    sudo yum update -y
 
-                      # Install Docker if not already installed
-                      if ! command -v docker &> /dev/null
-                      then
-                          echo "Docker not found. Installing Docker..."
-                          sudo amazon-linux-extras install docker -y
-                          sudo systemctl start docker
-                          sudo systemctl enable docker
-                      fi
+                    # Install Docker if not already installed
+                    if ! command -v docker &> /dev/null
+                    then
+                        echo "Docker not found. Installing Docker..."
+                        sudo amazon-linux-extras install docker -y
+                        sudo systemctl start docker
+                        sudo systemctl enable docker
+                    fi
 
-                      # Ensure Docker daemon is running
-                      sudo systemctl start docker
+                    # Ensure Docker daemon is running
+                    sudo systemctl start docker
 
-                      # Login to Github Container Registry
-                      echo "${GHCR_PAT}" | sudo docker login ghcr.io -u ${EC2_USER} --password-stdin
+                    # Login to Github Container Registry
+                    echo "${GHCR_PAT}" | sudo docker login ghcr.io -u ${EC2_USER} --password-stdin
 
-                      # Stop the old container if it exists
-                      sudo docker stop engineermandi-backend || echo "Container not running, skipping stop."
-                      sudo docker rm engineermandi-backend || echo "Container not found, skipping remove."
+                    # Stop the old container if it exists
+                    sudo docker stop engineermandi-backend || echo "Container not running, skipping stop."
+                    sudo docker rm engineermandi-backend || echo "Container not found, skipping remove."
 
-                      # Pull the latest image
-                      sudo docker pull ${DOCKER_IMAGE}
+                    # Pull the latest image
+                    sudo docker pull ${DOCKER_IMAGE}
 
-                      # Run the new container with the .env file
-                      sudo docker run -d --env-file .env -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                    # Run the new container with the .env file
+                    sudo docker run -d --env-file .env -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
