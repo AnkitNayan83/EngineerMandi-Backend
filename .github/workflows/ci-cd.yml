@@ -95,11 +95,6 @@ jobs:
                   EC2_USER: ${{ secrets.EC2_USER }}
                   EC2_SSH_KEY: ${{ secrets.EC2_KEY }}
                   DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
-                  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-                  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-                  JWT_KEY: ${{ secrets.JWT_KEY }}
-                  PORT: ${{ secrets.PORT }}
-                  DB_URL: ${{ secrets.DB_URL }}
                   GHCR_PAT: ${{ secrets.GHCR_PAT }}
               run: |
                   echo "Deploying to production..."
