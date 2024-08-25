@@ -118,10 +118,10 @@ jobs:
                       set -e
 
                       # Ensure the target directory exists
-                      mkdir -p /home/${EC2_USER}/env-files
+                      mkdir -p /tmp/env-files
 
                       # Write environment variables to .env file in the correct location
-                      cat <<EOT > /home/${EC2_USER}/env-files/.env
+                      cat <<EOT > /tmp/env-files/.env
                       JWT_KEY=${JWT_KEY}
                       GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
                       GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
@@ -155,5 +155,5 @@ jobs:
                       sudo docker pull ${DOCKER_IMAGE}
 
                       # Run the new container with the .env file
-                      sudo docker run --env-file /home/${EC2_USER}/env-files/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                      sudo docker run --env-file /tmp/env-files/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
