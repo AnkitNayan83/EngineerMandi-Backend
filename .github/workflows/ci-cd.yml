@@ -92,12 +92,13 @@ jobs:
                   EC2_USER: ${{ secrets.EC2_USER }}
                   EC2_SSH_KEY: ${{ secrets.EC2_KEY }}
                   DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
-                  GHCR_PAT: ${{ secrets.GHCR_PAT }}
-                  JWT_KEY: ${{ secrets.JWT_KEY }}
-                  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+                  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+                  JWT_KEY: ${{ secrets.JWT_KEY }}
                   PORT: ${{ secrets.PORT }}
                   DB_URL: ${{ secrets.DB_URL }}
+                  GHCR_PAT: ${{ secrets.GHCR_PAT }}
               run: |
                   echo "Deploying to production..."
 
@@ -106,25 +107,31 @@ jobs:
 
                   mkdir -p ~/.ssh
 
-                  # Save private key to ec2_key.pem
+                  # save private key to ec2_key.pem
                   echo "$EC2_SSH_KEY" > ec2_key.pem
                   chmod 600 ec2_key.pem
 
-                  # Add the EC2 host key to known_hosts to avoid verification failures
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-                  # SSH into EC2 and deploy
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'EOF'
                       set -e
+                      export DOCKER_IMAGE="${DOCKER_IMAGE}"
+                      export GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID}"
+                      export PORT="${PORT}"
+                      export DB_URL="${DB_URL}"
+                      export GHCR_PAT="${GHCR_PAT}"
+                      export EC2_USER="${EC2_USER}"
+                      export EC2_HOST="${EC2_HOST}"
+                      export GOOGLE_CLIENT_SECRET = "${GOOGLE_CLIENT_SECRET}"
+                      export JWT_KEY = "${JWT_KEY}"
 
-                      # Ensure the target directory exists
-                      mkdir -p /tmp/env-files
-
-                      # Write environment variables to .env file in the correct location
-                      cat <<EOT > /tmp/env-files/.env
-                      JWT_KEY=${JWT_KEY}
-                      GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+                      # Create .env file
+                      cat <<EOT > .env
                       GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+                      GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+
+                      JWT_KEY=${JWT_KEY}
+                      
                       PORT=${PORT}
                       DB_URL=${DB_URL}
                       EOT
@@ -155,5 +162,5 @@ jobs:
                       sudo docker pull ${DOCKER_IMAGE}
 
                       # Run the new container with the .env file
-                      sudo docker run --env-file /tmp/env-files/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                      sudo docker run -d --env-file .env -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
