@@ -119,12 +119,14 @@ jobs:
                   ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
 
                       set -e
-                      echo "JWT_KEY=${JWT_KEY}" > /home/${USER}/.env
-                      echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> /home/${USER}/.env
-                      echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> /home/${USER}/.env
-                      echo "PORT=${PORT}" >> /home/${USER}/.env
-                      echo "DB_URL=${DB_URL}" >> /home/${USER}/.env
 
+                      cat <<EOT > /home/${EC2_USER}/.env
+                      JWT_KEY=${JWT_KEY}
+                      GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+                      GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+                      PORT=${PORT}
+                      DB_URL=${DB_URL}
+                      EOT
 
                       # Update package index
                       sudo yum update -y
@@ -152,5 +154,5 @@ jobs:
                       sudo docker pull ${DOCKER_IMAGE}
 
                       # Run the new container with .env file
-                      sudo docker run --env-file /home/${USER}/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+                      sudo docker run --env-file /home/${EC2_USER}/.env -d -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
                   EOF
