@@ -97,7 +97,7 @@ jobs:
                   DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
                   GHCR_PAT: ${{ secrets.GHCR_PAT }}
               run: |
-                  echo "Deploying to production..."
+                  echo "Deploying to production...🚀"
 
                   # Set up SSH key
                   mkdir -p ~/.ssh
