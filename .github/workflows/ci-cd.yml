@@ -86,13 +86,15 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v3
 
+            - name: Install SSH client
+              run: sudo apt-get install -y ssh
+
             - name: Deploy to production
               env:
                   EC2_HOST: ${{ secrets.EC2_HOST }}
                   EC2_USER: ${{ secrets.EC2_USER }}
                   EC2_SSH_KEY: ${{ secrets.EC2_KEY }}
                   DOCKER_IMAGE: ghcr.io/ankitnayan83/engineermandi-backend:latest
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
                   GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
                   JWT_KEY: ${{ secrets.JWT_KEY }}
@@ -102,50 +104,42 @@ jobs:
               run: |
                   echo "Deploying to production..."
 
-                  sudo apt-get update
-                  sudo apt-get install -y ssh
-
+                  # Set up SSH key
                   mkdir -p ~/.ssh
+                  echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
+                  chmod 600 ~/.ssh/ec2_key.pem
 
-                  # save private key to ec2_key.pem
-                  echo "$EC2_SSH_KEY" > ec2_key.pem
-                  chmod 600 ec2_key.pem
-
+                  # Add EC2 host to known hosts
                   ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-                  ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} <<EOF
-                    # Create .env file
-                    cat <<EOT > .env
-                      GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-                      GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-                      JWT_KEY=${JWT_KEY}
-                      PORT=${PORT}
-                      DB_URL=${DB_URL}
-                    EOT
+                  # Connect to EC2 and execute deployment commands
+                  ssh -i ~/.ssh/ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
+                    # Create .env file on EC2
+                    echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" > .env
+                    echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> .env
+                    echo "JWT_KEY=${JWT_KEY}" >> .env
+                    echo "PORT=${PORT}" >> .env
+                    echo "DB_URL=${DB_URL}" >> .env
 
-                    # Update package index
+                    # Update the package index and install Docker if not present
                     sudo yum update -y
-
-                    # Install Docker if not already installed
-                    if ! command -v docker &> /dev/null
-                    then
-                        echo "Docker not found. Installing Docker..."
+                    if ! command -v docker &> /dev/null; then
                         sudo amazon-linux-extras install docker -y
                         sudo systemctl start docker
                         sudo systemctl enable docker
                     fi
 
-                    # Ensure Docker daemon is running
+                    # Ensure Docker is running
                     sudo systemctl start docker
 
-                    # Login to Github Container Registry
+                    # Login to GitHub Container Registry
                     echo "${GHCR_PAT}" | sudo docker login ghcr.io -u ${EC2_USER} --password-stdin
 
-                    # Stop the old container if it exists
-                    sudo docker stop engineermandi-backend || echo "Container not running, skipping stop."
-                    sudo docker rm engineermandi-backend || echo "Container not found, skipping remove."
+                    # Stop and remove the old container if it exists
+                    sudo docker stop engineermandi-backend || true
+                    sudo docker rm engineermandi-backend || true
 
-                    # Pull the latest image
+                    # Pull the latest Docker image
                     sudo docker pull ${DOCKER_IMAGE}
 
                     # Run the new container with the .env file
