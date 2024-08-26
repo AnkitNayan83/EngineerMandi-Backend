@@ -128,7 +128,7 @@ jobs:
                     sudo docker stop engineermandi-backend || true
                     sudo docker rm engineermandi-backend || true
 
-                    # Pull the latest Docker image
+                    # Pull the latest Docker image.
                     sudo docker pull ${DOCKER_IMAGE}
 
                     # Run the new container with the .env file
