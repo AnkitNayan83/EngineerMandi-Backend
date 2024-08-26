@@ -133,7 +133,4 @@ jobs:
 
                     # Run the new container with the .env file
                     sudo docker run -d -v /config/.env:/app/env:ro -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
-
-                    # Optional: Clean up old Docker images
-                    sudo docker image prune -f
                   EOF
