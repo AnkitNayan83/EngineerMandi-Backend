@@ -133,4 +133,7 @@ jobs:
 
                     # Run the new container with the .env file
                     sudo docker run -d -v /config/.env:/app/.env:ro -p 80:80 --name engineermandi-backend ${DOCKER_IMAGE}
+
+                    # Log container status
+                    sudo docker logs engineermandi-backend
                   EOF
