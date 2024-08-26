@@ -1,7 +1,10 @@
 services:
-    app:
-        image: ghcr.io/ankitnayan83/engineermandi-backend:latest
-        env_file:
-            - .env
+    api:
+        container_name: engineermandi-api
+        build:
+            context: .
+            dockerfile: Dockerfile
         ports:
             - "8080:8080"
+        env_file:
+            - .env
