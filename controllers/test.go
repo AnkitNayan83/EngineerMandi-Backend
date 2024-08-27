@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,5 +9,7 @@ import (
 
 func HealthCheckup(c *gin.Context) {
 
-	c.JSON(http.StatusOK, gin.H{"message": "Server is up and running"})
+	msg := fmt.Sprintf("Server is up and running on port %s", c.Request.Host)
+
+	c.JSON(http.StatusOK, gin.H{"message": msg})
 }
