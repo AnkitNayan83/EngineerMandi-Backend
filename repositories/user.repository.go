@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/AnkitNayan83/EngineerMandi-Backend/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -68,6 +69,58 @@ func (r *userRepository) CreateEngineer(engineer models.EngineerModel) error {
 	resp := r.DB.Create(&engineer)
 	if resp.Error != nil {
 		return resp.Error
+	}
+	return nil
+}
+
+func (r *userRepository) CreateConversation(conversation *models.Conversation) error {
+	resp := r.DB.Create(&conversation)
+	if resp.Error != nil {
+		return resp.Error
+	}
+	return nil
+}
+
+func (r *userRepository) FindConversationById(id uuid.UUID) (*models.Conversation, error) {
+	var conversation models.Conversation
+	err := r.DB.Where("id = ?", id).First(&conversation).Error
+	if err != nil {
+		return nil, err
+	}
+	return &conversation, nil
+}
+
+func (r *userRepository) EndConversation(id uuid.UUID) error {
+	err := r.DB.Model(&models.Conversation{}).Where("id = ?", id).Update("is_over", true).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *userRepository) GetConversationMessages(conversationId uuid.UUID) ([]models.Message, error) {
+	var messages []models.Message
+	err := r.DB.Where("conversation_id = ?", conversationId).Find(&messages).Error
+	if err != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
+func (r *userRepository) EditMessage(messageId uuid.UUID, senderId uuid.UUID, content string) error {
+	err := r.DB.Model(&models.Message{}).Where("id = ? AND sender_id = ?", messageId, senderId).Update("content", content).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *userRepository) DeleteMessage(messageId uuid.UUID, senderId uuid.UUID) error {
+	err := r.DB.Where("id = ? AND sender_id = ?", messageId, senderId).Update(
+		"is_deleted = ? content = This message has been deleted", true).Error
+
+	if err != nil {
+		return err
 	}
 	return nil
 }

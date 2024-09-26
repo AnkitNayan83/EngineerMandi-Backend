@@ -27,6 +27,7 @@ type User struct {
 	State          string    `json:"state"`
 	Country        string    `json:"country"`
 	Role           Role      `gorm:"type:VARCHAR(20);default:client" json:"role"`
+	Conversations  []*Conversation
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
 }
@@ -37,4 +38,23 @@ type OAuthUser struct {
 	LastName  string `json:"family_name"`
 	Email     string `json:"email"`
 	Picture   string `json:"picture"`
+}
+
+type Conversation struct {
+	ID           uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	IsOver       bool       `gorm:"default:false" json:"isOver"`
+	Participants []*User    `gorm:"many2many:conversation_participants;" json:"participants"`
+	Messages     []*Message `gorm:"foreignKey:ConversationID" json:"messages"`
+}
+
+type Message struct {
+	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	ConversationID  uuid.UUID `json:"conversationID"`
+	SenderID        uuid.UUID `json:"senderID"`
+	Content         string    `json:"content"`
+	SentAt          time.Time `json:"sentAt"`
+	IsEdited        bool      `gorm:"default:true" json:"isEdited"`
+	IsDeleted       bool      `gorm:"default:true" json:"isDeleted"`
+	Attachments     []string  `json:"attachments,omitempty"`
+	AttachmentsType string    `json:"attachmentsType,omitempty"`
 }
